@@ -121,4 +121,8 @@ object Utils {
             return false
         }
     }
+
+    inline fun <K, V> MutableMap<K, V>.removeIf(predicate: (K, V) -> Boolean) {
+        this.filter { (key, value) -> predicate(key, value) }.forEach { this.remove(it.key) }
+    }
 }

@@ -1,0 +1,106 @@
+package org.frknkrc44.hma_oss.zygote.hook
+
+import icu.nullptr.hidemyapplist.common.Constants
+import icu.nullptr.hidemyapplist.common.Utils
+import org.frknkrc44.hma_oss.zygote.BulkHooker
+import org.frknkrc44.hma_oss.zygote.HMAService
+import org.frknkrc44.hma_oss.zygote.Utils4Zygote
+import org.frknkrc44.hma_oss.zygote.ZygoteConstants.PACKAGE_MANAGER_SERVICE_CLASS
+import org.frknkrc44.hma_oss.zygote.logD
+import org.frknkrc44.hma_oss.zygote.logI
+import org.frknkrc44.hma_oss.zygote.logV
+
+class PmsHookTarget29(service: HMAService) : PmsHookTargetBase(service) {
+
+    override val TAG = "PmsHookTarget29"
+
+    // not required until SDK 30
+    override val fakeSystemPackageInstallSourceInfo = null
+    override val fakeUserPackageInstallSourceInfo = null
+
+    @Suppress("UNCHECKED_CAST")
+    override fun load() {
+        logI(TAG, "Load hook")
+
+        BulkHooker.instance.apply {
+            hookBefore(
+                service.pms::class.java.name,
+                "filterAppAccessLPr",
+                paramCount = 5,
+            ) { param ->
+                val callingUid = param.args!![2] as Int
+                if (callingUid == Constants.UID_SYSTEM) return@hookBefore
+                val packageSettings = param.args[1] ?: return@hookBefore
+                val targetApp = Utils4Zygote.getPackageNameFromPackageSettings(packageSettings)
+                if (service.shouldHideFromUid(callingUid, targetApp) == true) {
+                    param.result = true
+                    service.increasePMFilterCount(callingUid)
+                    logD(TAG, "@filterAppAccessLPr caller cache: $callingUid, target: $targetApp")
+                    return@hookBefore
+                }
+                val callingApps = Utils.binderLocalScope {
+                    service.pms.getPackagesForUid(callingUid)
+                } ?: return@hookBefore
+                val caller = callingApps.firstOrNull { service.shouldHide(it, targetApp) }
+                if (caller != null) {
+                    param.result = true
+                    service.putShouldHideUidCache(callingUid, caller, targetApp!!)
+                    service.increasePMFilterCount(caller)
+                    val last = lastFilteredApp.getAndSet(caller)
+                    if (last != caller) logI(TAG, "@filterAppAccessLPr query from $caller")
+                    logD(TAG, "@filterAppAccessLPr caller: $callingUid $caller, target: $targetApp")
+                }
+            }
+
+            hookBefore(
+                PACKAGE_MANAGER_SERVICE_CLASS,
+                "getPackageInfoInternal",
+            ) { param ->
+                val targetApp = param.args!![1] as String? ?: return@hookBefore
+                val callingUid = param.args[4] as Int
+                if (callingUid == Constants.UID_SYSTEM) return@hookBefore
+                logV(TAG, "@${param.methodName} incoming query: $callingUid => $targetApp")
+                if (service.shouldHideFromUid(callingUid, targetApp) == true) {
+                    param.result = null
+                    service.increasePMFilterCount(callingUid)
+                    logD(TAG, "@${param.methodName} caller cache: $callingUid, target: $targetApp")
+                    return@hookBefore
+                }
+                val callingApps = Utils4Zygote.getCallingApps(service, callingUid)
+                val caller = callingApps.firstOrNull { service.shouldHide(it, targetApp) }
+                if (caller != null) {
+                    logD(TAG, "@${param.methodName} caller: $callingUid $caller, target: $targetApp")
+                    param.result = null
+                    service.putShouldHideUidCache(callingUid, caller, targetApp)
+                    service.increasePMFilterCount(caller)
+                }
+            }
+
+            hookBefore(
+                PACKAGE_MANAGER_SERVICE_CLASS,
+                "getApplicationInfoInternal",
+            ) { param ->
+                val targetApp = param.args!![1] as String? ?: return@hookBefore
+                val callingUid = param.args[3] as Int
+                if (callingUid == Constants.UID_SYSTEM) return@hookBefore
+                logV(TAG, "@${param.methodName} incoming query: $callingUid => $targetApp")
+                if (service.shouldHideFromUid(callingUid, targetApp) == true) {
+                    param.result = null
+                    service.increasePMFilterCount(callingUid)
+                    logD(TAG, "@${param.methodName} caller cache: $callingUid, target: $targetApp")
+                    return@hookBefore
+                }
+                val callingApps = Utils4Zygote.getCallingApps(service, callingUid)
+                val caller = callingApps.firstOrNull { service.shouldHide(it, targetApp) }
+                if (caller != null) {
+                    logD(TAG, "@${param.methodName} caller: $callingUid $caller, target: $targetApp")
+                    param.result = null
+                    service.putShouldHideUidCache(callingUid, caller, targetApp)
+                    service.increasePMFilterCount(caller)
+                }
+            }
+        }
+
+        super.load()
+    }
+}

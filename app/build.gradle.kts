@@ -122,6 +122,10 @@ android {
         viewBinding = true
     }
 
+    base {
+        archivesName = "${rootProject.name}-${defaultConfig.versionName}"
+    }
+
     packaging {
         dex.useLegacyPackaging = true
         resources {
@@ -148,7 +152,6 @@ autoResConfig {
 
 dependencies {
     implementation(projects.common)
-    runtimeOnly(projects.xposed)
 
     implementation(libs.androidx.navigation.fragment.ktx)
     implementation(libs.androidx.navigation.ui.ktx)
@@ -164,12 +167,4 @@ dependencies {
 
     implementation(libs.androidx.appcompat.appcompat)
     implementation(libs.material)
-}
-
-android.applicationVariants.all {
-    outputs.all {
-        (this as BaseVariantOutputImpl).apply {
-            outputFileName = "${rootProject.name.replace(" ", "_")}-${versionName}-${buildType.name}.apk"
-        }
-    }
 }

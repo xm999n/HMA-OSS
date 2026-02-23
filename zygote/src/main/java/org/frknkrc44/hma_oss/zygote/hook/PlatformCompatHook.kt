@@ -1,0 +1,64 @@
+package org.frknkrc44.hma_oss.zygote.hook
+
+import android.content.pm.ApplicationInfo
+import android.os.Build
+import androidx.annotation.RequiresApi
+import icu.nullptr.hidemyapplist.common.PropertyUtils
+import org.frknkrc44.hma_oss.common.BuildConfig
+import org.frknkrc44.hma_oss.zygote.BulkHooker
+import org.frknkrc44.hma_oss.zygote.HMAService
+import org.frknkrc44.hma_oss.zygote.ZygoteConstants.PLATFORM_COMPAT_CLASS
+import org.frknkrc44.hma_oss.zygote.logD
+import org.frknkrc44.hma_oss.zygote.logE
+import org.frknkrc44.hma_oss.zygote.logI
+
+@RequiresApi(Build.VERSION_CODES.R)
+class PlatformCompatHook(private val service: HMAService) : IFrameworkHook {
+
+    companion object {
+        private const val TAG = "PlatformCompatHook"
+    }
+
+    private val sAppDataIsolationEnabled by lazy {
+        PropertyUtils.isAppDataIsolationEnabled || service.config.altAppDataIsolation
+    }
+
+    override fun load() {
+        if (!service.config.forceMountData) return
+        logI(TAG, "Load hook")
+        logI(TAG, "App data isolation enabled: $sAppDataIsolationEnabled")
+
+        BulkHooker.instance.hookBefore(
+            PLATFORM_COMPAT_CLASS,
+            "isChangeEnabled",
+        ) { param ->
+            runCatching {
+                if (!sAppDataIsolationEnabled) return@hookBefore
+
+                val changeId = param.args!![1] as Long
+                if (changeId != 143937733L) return@hookBefore
+
+                val appInfo = param.args[2] as ApplicationInfo
+                val app = appInfo.packageName
+                if (app == BuildConfig.APP_PACKAGE_NAME || app in service.systemApps) return@hookBefore
+                if (service.isHookEnabled(app)) {
+                    param.result = true
+                    logD(TAG, "force mount data: ${appInfo.uid} $app")
+                }
+            }.onFailure {
+                logE(TAG, "Fatal error occurred, disable hooks", it)
+                unload()
+            }
+        }
+    }
+
+    override fun onConfigChanged() {
+        /*
+        if (service.config.forceMountData) {
+            if (hook == null) load()
+        } else {
+            if (hook != null) unload()
+        }
+         */
+    }
+}

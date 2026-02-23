@@ -1,0 +1,167 @@
+package org.frknkrc44.hma_oss.zygote.hook
+
+import android.content.AttributionSource
+import android.database.Cursor
+import android.database.MatrixCursor
+import android.net.Uri
+import android.os.Build
+import android.os.Bundle
+import android.provider.Settings
+import org.frknkrc44.hma_oss.zygote.BulkHooker
+import org.frknkrc44.hma_oss.zygote.HMAService
+import org.frknkrc44.hma_oss.zygote.Utils4Zygote
+import org.frknkrc44.hma_oss.zygote.ZygoteConstants.CONTENT_PROVIDER_TRANSPORT_CLASS
+import org.frknkrc44.hma_oss.zygote.logD
+
+class ContentProviderHook(private val service: HMAService): IFrameworkHook {
+    companion object {
+        private const val TAG = "ContentProviderHook"
+        private val NV_PAIR = arrayOf("name", "value")
+    }
+
+    @Suppress("UNCHECKED_CAST")
+    override fun load() {
+        BulkHooker.instance.apply {
+            hookAfter(
+                CONTENT_PROVIDER_TRANSPORT_CLASS,
+                "query",
+            ) { param ->
+                val callingApps = getCallingPackages(param)
+
+                val caller = callingApps.firstOrNull { service.isHookEnabled(it) }
+                if (caller == null) return@hookAfter
+
+                val uriIdx = param.args?.indexOfFirst { it is Uri } ?: return@hookAfter
+                val uri = param.args[uriIdx] as Uri
+                val projection = param.args[uriIdx + 1] as Array<String>?
+                val args = param.args[uriIdx + 2] as Bundle?
+
+                if (uri.authority != "settings") return@hookAfter
+
+                val segments = uri.pathSegments
+                if (segments.isEmpty()) return@hookAfter
+
+                logD(TAG, "@spoofSettings QUERY in ${callingApps.contentToString()}: $uri, ${projection?.contentToString()}, $args")
+
+                val database = segments[0]
+
+                if (segments.size >= 2) {
+                    val name = segments[1]
+
+                    logD(TAG, "@spoofSettings QUERY received caller: $caller, database: $database, name: $name")
+
+                    val replacement = service.getSpoofedSetting(caller, name, database)
+                    if (replacement != null) {
+                        logD(TAG, "@spoofSettings QUERY $name in $database replaced for $caller")
+                        param.result = MatrixCursor(arrayOf("name", "value"), 1).apply {
+                            addRow(arrayOf(replacement.name, replacement.value))
+                        }
+
+                        service.increaseSettingsFilterCount(caller)
+                    }
+                } else {
+                    logD(TAG, "@spoofSettings LIST_QUERY received caller: $caller, database: $database")
+
+                    val result = param.result as Cursor? ?: return@hookAfter
+
+                    val columns = mutableMapOf<String, MutableList<String?>>().apply {
+                        for (i in 0 ..< result.columnCount) {
+                            put(result.getColumnName(i), mutableListOf())
+                        }
+                    }
+
+                    logD(TAG, "@spoofSetting LIST_QUERY columns: ${columns.keys}")
+
+                    val keyColumn = columns["name"]
+                    val valueColumn = columns["value"]
+
+                    if (keyColumn == null || valueColumn == null) {
+                        logD(TAG, "@spoofSettings LIST_QUERY invalid query: $caller ($keyColumn, $valueColumn)")
+                        return@hookAfter
+                    }
+
+                    while (result.moveToNext()) {
+                        val name = result.getString(columns.keys.indexOf("name"))
+                        keyColumn.add(name)
+
+                        val replacement = service.getSpoofedSetting(caller, name, database)
+                        val value = if (replacement != null) {
+                            logD(TAG, "@spoofSettings QUERY $name in $database replaced for $caller")
+
+                            service.increaseSettingsFilterCount(caller)
+
+                            replacement.value
+                        } else {
+                            result.getString(columns.keys.indexOf("value"))
+                        }
+
+                        valueColumn.add(value)
+
+                        if (columns.keys.size > 2) {
+                            for (otherCol in columns.keys.filter { it !in NV_PAIR }) {
+                                val other = result.getString(columns.keys.indexOf(otherCol))
+
+                                columns[otherCol]!!.add(other)
+                            }
+                        }
+                    }
+
+                    param.result = MatrixCursor(columns.keys.toTypedArray(), columns.size).apply {
+                        val size = columns.values.first().size
+                        for (i in 0 ..< size) {
+                            val innerList = mutableListOf<String?>()
+
+                            columns.values.forEach { colVal ->
+                                innerList.add(colVal[i])
+                            }
+
+                            addRow(innerList)
+                        }
+                    }
+                }
+            }
+
+            hookBefore(
+                CONTENT_PROVIDER_TRANSPORT_CLASS,
+                "call",
+            ) { param ->
+                val callingApps = getCallingPackages(param)
+                val caller = callingApps.firstOrNull { service.isHookEnabled(it) }
+                if (caller == null) return@hookBefore
+
+                val nameIdx = param.args?.indexOfLast { it is String } ?: return@hookBefore
+                val name = param.args[nameIdx] as String?
+                val method = param.args[nameIdx - 1] as String?
+
+                logD(TAG, "@spoofSettings CALL received caller: ${callingApps.contentToString()}, method: $method, name: $name")
+
+                when (method) {
+                    "GET_global", "GET_secure", "GET_system" -> {
+                        val database = method.substring(method.indexOf('_') + 1)
+                        val replacement = service.getSpoofedSetting(caller, name, database)
+                        if (replacement != null) {
+                            logD(TAG, "@spoofSettings CALL $name in $database replaced for $caller")
+                            param.result = Bundle().apply {
+                                putString(Settings.NameValueTable.VALUE, replacement.value)
+                                putInt("_generation_index", -1)
+                            }
+
+                            service.increaseSettingsFilterCount(caller)
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private fun getCallingPackages(param: BulkHooker.HookParam) = try {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            val attrSource = param.args!!.first { it is AttributionSource } as AttributionSource
+            arrayOf(attrSource.packageName)
+        } else {
+            arrayOf(param.args!!.first { it is String } as String)
+        }
+    } catch (_: Throwable) {
+        Utils4Zygote.getCallingApps(service)
+    }
+}

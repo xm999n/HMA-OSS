@@ -1,12 +1,13 @@
 import com.android.build.api.dsl.ApplicationExtension
 import com.android.build.gradle.BaseExtension
-import org.jetbrains.kotlin.konan.properties.Properties
+import java.util.Properties
 
 plugins {
     alias(libs.plugins.kotlin) apply false
     alias(libs.plugins.agp.app) apply false
     alias(libs.plugins.agp.lib) apply false
     alias(libs.plugins.nav.safeargs.kotlin) apply false
+    alias(libs.plugins.com.github.aerathstuff.zygoteloader) apply false
 }
 
 fun String.execute(currentWorkingDir: File = file("./")): String {

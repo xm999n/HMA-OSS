@@ -5,6 +5,8 @@ pluginManagement {
         gradlePluginPortal()
         google()
         mavenCentral()
+        mavenLocal()
+        maven("https://jitpack.io")
         maven("https://mirrors.cloud.tencent.com/nexus/repository/maven-public")
         maven("https://maven.aliyun.com/repository/public")
     }
@@ -15,10 +17,10 @@ dependencyResolutionManagement {
     repositories {
         google()
         mavenCentral()
+        mavenLocal()
+        maven("https://jitpack.io")
         maven("https://mirrors.cloud.tencent.com/nexus/repository/maven-public")
         maven("https://maven.aliyun.com/repository/public")
-        maven("https://jitpack.io")
-        maven("https://api.xposed.info/")
     }
 }
 
@@ -26,6 +28,6 @@ rootProject.name = "HMA-OSS"
 
 include(
     ":app",
-    ":common",
-    ":xposed"
+    ":common"
 )
+include(":zygote")

@@ -1,0 +1,39 @@
+package org.frknkrc44.hma_oss.zygote.hook
+
+import icu.nullptr.hidemyapplist.common.Constants
+import org.frknkrc44.hma_oss.zygote.BulkHooker
+import org.frknkrc44.hma_oss.zygote.HMAService
+import org.frknkrc44.hma_oss.zygote.ZygoteConstants.ZYGOTE_PROCESS_CLASS
+import org.frknkrc44.hma_oss.zygote.logD
+
+class ZygoteHook(private val service: HMAService) : IFrameworkHook {
+    companion object {
+        const val TAG = "ZygoteHook"
+    }
+
+    override fun load() {
+        BulkHooker.instance.hookBefore(
+            ZYGOTE_PROCESS_CLASS,
+            "start",
+        ) { param ->
+            logD(TAG, "@startZygoteProcess: Starting ${param.args.contentToString()}")
+
+            // ignore if the GIDs array is null
+            val gIDsIndex = param.args!!.indexOfFirst { it is IntArray }
+            if (gIDsIndex < 0) return@hookBefore
+
+            val caller = param.args.lastOrNull { it is String } as String? ?: return@hookBefore
+            var perms = service.getRestrictedZygotePermissions(caller) ?: return@hookBefore
+            if (perms.isNotEmpty()) {
+                val gIDs = param.args[gIDsIndex] as IntArray
+
+                // add more security, reject if not available in GID_PAIRS
+                perms = perms.filter { Constants.GID_PAIRS.containsValue(it) }
+
+                logD(TAG, "@startZygoteProcess: GIDs are ${gIDs.contentToString()}, removing $perms now")
+                param.args[gIDsIndex] = gIDs.filter { it !in perms }.toIntArray()
+                service.increaseOthersFilterCount(caller)
+            }
+        }
+    }
+}
