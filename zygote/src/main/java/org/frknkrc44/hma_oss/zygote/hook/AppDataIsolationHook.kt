@@ -143,7 +143,6 @@ class AppDataIsolationHook(private val service: HMAService): IFrameworkHook {
 
                     if (!fuseEnabled) {
                         logE(TAG, "StorageManagerService - FUSE storage is not enabled, disable hooks")
-                        unload()
                         return@hookBefore
                     }
 

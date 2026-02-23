@@ -47,7 +47,6 @@ class PlatformCompatHook(private val service: HMAService) : IFrameworkHook {
                 }
             }.onFailure {
                 logE(TAG, "Fatal error occurred, disable hooks", it)
-                unload()
             }
         }
     }

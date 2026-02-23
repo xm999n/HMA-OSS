@@ -440,24 +440,10 @@ class HMAService(val pms: IPackageManager, val pmn: Any?) : IHMAService.Stub() {
     }
 
     override fun stopService(cleanEnv: Boolean) {
-        // It is an unimplemented method
-        if (true) return
+        if (!cleanEnv) return
 
-        logI(TAG, "Stop service")
-        synchronized(loggerLock) {
-            logcatAvailable = false
-        }
-        synchronized(configLock) {
-            frameworkHooks.forEach(IFrameworkHook::unload)
-            frameworkHooks.clear()
-            BulkHooker.instance.unhookAll()
-            if (cleanEnv) {
-                logI(TAG, "Clean runtime environment")
-                File(dataDir).deleteRecursively()
-                return
-            }
-        }
-        instance = null
+        logI(TAG, "Clean runtime environment")
+        File(dataDir).deleteRecursively()
     }
 
     fun addLog(parsedMsg: String) {

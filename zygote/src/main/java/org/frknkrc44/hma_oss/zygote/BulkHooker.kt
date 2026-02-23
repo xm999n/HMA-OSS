@@ -154,12 +154,11 @@ class BulkHooker private constructor() {
                                 if (BuildConfig.DEBUG) {
                                     logI(TAG, "Hooked: $executable")
                                 }
-                                val invoker = Hooks.hook(
+                                Hooks.hook(
                                     executable, Hooks.EntryPointType.DIRECT,
                                     element.impl, Hooks.EntryPointType.DIRECT
                                 )
 
-                                element.unhooks.add(Unhook(executable, invoker))
                                 element.applyCount++
                             }
                         }
@@ -186,47 +185,13 @@ class BulkHooker private constructor() {
         }
     }
 
-    fun unhook(element: HookElement) {
-        for (unhook in element.unhooks) {
-            unhook.unhook()
-        }
-
-        element.unhooks.clear()
-    }
-
-    fun unhookAll() {
-        // TODO: Not working yet, find a way to implement unhook properly
-        /*
-        for (entry in hooks.entries) {
-            for (element in entry.value) {
-                unhook(element)
-            }
-        }
-
-        hooks.clear()
-         */
-    }
-
     data class HookElement(
         val impl: HookTransformer,
-        val unhooks: MutableList<Unhook> = mutableListOf(),
         val pattern: String,
         val hookFirst: Boolean,
         val paramCount: Int = -1,
         var applyCount: Int = 0,
     )
-
-    class Unhook(private val backup: Executable, private val invoker: Executable) {
-        fun unhook() {
-            // TODO: Not working yet, find a way to implement unhook properly
-            Hooks.hookSwap(
-                backup,
-                Hooks.EntryPointType.DIRECT,
-                invoker,
-                Hooks.EntryPointType.DIRECT,
-            )
-        }
-    }
 
     class ReturnValue(initialValue: Any? = null) {
         var replace: Boolean = false
