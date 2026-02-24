@@ -6,8 +6,10 @@ import android.os.Build
 import android.os.Bundle
 import icu.nullptr.hidemyapplist.common.Constants
 import icu.nullptr.hidemyapplist.common.Utils
+import icu.nullptr.hidemyapplist.common.Utils.getPackageInfoCompat
 import org.frknkrc44.hma_oss.common.BuildConfig
 import org.frknkrc44.hma_oss.zygote.Utils4Zygote.getStaticIntField
+import org.frknkrc44.hma_oss.zygote.Utils4Zygote.verifyAppSignature
 import rikka.hidden.compat.ActivityManagerApis
 import rikka.hidden.compat.adapter.UidObserverAdapter
 
@@ -15,7 +17,7 @@ object UserService {
 
     private const val TAG = "HMA-UserService"
 
-    private var appUid = 0
+
 
     private val uidObserver = object : UidObserverAdapter() {
         override fun onUidActive(uid: Int) {
@@ -24,7 +26,10 @@ object UserService {
                 return
             }
 
-            if (uid != appUid) return
+            if (HMAService.instance!!.appUid < 0 || uid != HMAService.instance?.appUid) {
+                return
+            }
+
             try {
                 val provider = ActivityManagerApis.getContentProviderExternal(Constants.PROVIDER_AUTHORITY, 0, null, null)
                 assert (provider != null) {
@@ -56,16 +61,22 @@ object UserService {
         val service = HMAService(pms, pmn)
 
         try {
-            appUid = Utils.getPackageUidCompat(service.pms, BuildConfig.APP_PACKAGE_NAME, 0, 0)
-            assert(appUid >= 0) {
+            val pkgInfo = getPackageInfoCompat(pms, BuildConfig.APP_PACKAGE_NAME, 0L, 0)
+            if (pkgInfo != null) {
+                if (verifyAppSignature(pkgInfo.applicationInfo?.sourceDir)) {
+                    logI(TAG, "The app signature is verified successfully")
+                    service.appUid = pkgInfo.applicationInfo!!.uid
+                } else {
+                    throw AssertionError("The app itself is modified, skipping")
+                }
+            }
+            assert(service.appUid >= 0) {
                 "App UID cannot be -1 or lower"
             }
+            logD(TAG, "Client uid: ${service.appUid}")
         } catch (e: Throwable) {
             logE(TAG, "Fatal: Cannot get package details\nCompile this app from source with your changes", e)
-            return
         }
-
-        logD(TAG, "Client uid: $appUid")
 
         Utils4Zygote.waitForService("activity")
         ActivityManagerApis.registerUidObserver(

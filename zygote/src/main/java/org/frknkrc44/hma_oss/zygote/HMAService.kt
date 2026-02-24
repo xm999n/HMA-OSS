@@ -16,6 +16,7 @@ import icu.nullptr.hidemyapplist.common.JsonConfig
 import icu.nullptr.hidemyapplist.common.PresetCacheHolder
 import icu.nullptr.hidemyapplist.common.RiskyPackageUtils.appHasGMSConnection
 import icu.nullptr.hidemyapplist.common.SettingsPresets
+import icu.nullptr.hidemyapplist.common.Utils
 import icu.nullptr.hidemyapplist.common.Utils.binderLocalScope
 import icu.nullptr.hidemyapplist.common.Utils.generateRandomString
 import icu.nullptr.hidemyapplist.common.Utils.getInstalledApplicationsCompat
@@ -26,6 +27,7 @@ import icu.nullptr.hidemyapplist.common.Utils.removeIf
 import icu.nullptr.hidemyapplist.common.app_presets.DetectorAppsPreset
 import icu.nullptr.hidemyapplist.common.settings_presets.ReplacementItem
 import org.frknkrc44.hma_oss.common.BuildConfig
+import org.frknkrc44.hma_oss.zygote.Utils4Zygote.verifyAppSignature
 import org.frknkrc44.hma_oss.zygote.hook.AccessibilityHook
 import org.frknkrc44.hma_oss.zygote.hook.ActivityHook
 import org.frknkrc44.hma_oss.zygote.hook.AppDataIsolationHook
@@ -70,6 +72,7 @@ class HMAService(val pms: IPackageManager, val pmn: Any?) : IHMAService.Stub() {
     private val frameworkHooks = mutableSetOf<IFrameworkHook>()
     val executor: ExecutorService = Executors.newSingleThreadExecutor()
     private val uidHideCache = mutableListOf<Triple<Int, String, MutableList<String>>>()
+    internal var appUid = 0
 
     var config = JsonConfig().apply { detailLog = true }
         private set
@@ -531,6 +534,17 @@ class HMAService(val pms: IPackageManager, val pmn: Any?) : IHMAService.Stub() {
             when (eventType) {
                 Intent.ACTION_PACKAGE_ADDED -> {
                     if (handlePackageAdded(pms, packageName, presetCache)) {
+                        if (packageName == BuildConfig.APP_PACKAGE_NAME) {
+                            val pkgInfo = getPackageInfoCompat(pms, packageName, 0L, 0)
+                            if (verifyAppSignature(pkgInfo?.applicationInfo?.sourceDir)) {
+                                logI(TAG, "The app signature is verified successfully")
+                                appUid = pkgInfo!!.applicationInfo!!.uid
+                            } else {
+                                logE(TAG, "The app itself is modified, skipping")
+                                appUid = -1
+                            }
+                        }
+
                         writePresetCache()
                     }
                 }
@@ -541,6 +555,10 @@ class HMAService(val pms: IPackageManager, val pmn: Any?) : IHMAService.Stub() {
                     }
 
                     if (handlePackageRemoved(packageName, presetCache)) {
+                        if (packageName == BuildConfig.APP_PACKAGE_NAME) {
+                            appUid = -1
+                        }
+
                         writePresetCache()
                     }
                 }

@@ -1,4 +1,8 @@
+import com.android.ide.common.signing.KeystoreHelper
 import com.v7878.zygisk.gradle.ZygoteLoader
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+import java.io.PrintStream
+import java.util.Locale
 
 plugins {
     alias(libs.plugins.agp.app)
@@ -13,6 +17,45 @@ android {
 
     defaultConfig {
         applicationId = namespace
+    }
+}
+
+afterEvaluate {
+    android.applicationVariants.forEach { variant ->
+        val variantCapped = variant.name.replaceFirstChar { it.titlecase(Locale.ROOT) }
+        val variantLowered = variant.name.lowercase(Locale.ROOT)
+
+        val outSrcDir = layout.buildDirectory.dir("generated/source/signInfo/${variantLowered}")
+        val outSrc = outSrcDir.get().file("org/frknkrc44/hma_oss/zygote/Magic.java")
+        val signInfoTask = tasks.register("generate${variantCapped}SignInfo") {
+            outputs.file(outSrc)
+            doLast {
+                val sign = android.buildTypes[variantLowered].signingConfig
+                outSrc.asFile.parentFile.mkdirs()
+                val certificateInfo = KeystoreHelper.getCertificateInfo(
+                    sign?.storeType,
+                    sign?.storeFile,
+                    sign?.storePassword,
+                    sign?.keyPassword,
+                    sign?.keyAlias
+                )
+                PrintStream(outSrc.asFile).apply {
+                    println("package org.frknkrc44.hma_oss.zygote;")
+                    println("public final class Magic {")
+                    print("public static final byte[] magicNumbers = {")
+                    val bytes = certificateInfo.certificate.encoded
+                    print(bytes.joinToString(",") { it.toString() })
+                    println("};")
+                    println("}")
+                }
+            }
+        }
+        variant.registerJavaGeneratingTask(signInfoTask, outSrcDir.get().asFile)
+
+        val kotlinCompileTask = tasks.findByName("compile${variantCapped}Kotlin") as KotlinCompile
+        kotlinCompileTask.dependsOn(signInfoTask)
+        val srcSet = objects.sourceDirectorySet("magic", "magic").srcDir(outSrcDir)
+        kotlinCompileTask.source(srcSet)
     }
 }
 
@@ -34,6 +77,7 @@ dependencies {
     implementation(projects.common)
 
     implementation(libs.androidx.annotation.jvm)
+    implementation(libs.com.android.tools.build.apksig)
     implementation(libs.io.github.vova7878.androidvmtools)
     implementation(libs.io.github.vova7878.r8annotations)
     implementation(libs.dev.rikka.hidden.compat)

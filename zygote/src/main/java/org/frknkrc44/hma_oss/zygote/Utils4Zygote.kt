@@ -5,11 +5,13 @@ import android.os.Binder
 import android.os.Build
 import android.os.IBinder
 import android.os.ServiceManager
+import com.android.apksig.ApkVerifier
 import com.v7878.unsafe.Reflection.getDeclaredField
 import com.v7878.unsafe.Reflection.getDeclaredMethod
 import com.v7878.unsafe.invoke.EmulatedStackFrame
 import icu.nullptr.hidemyapplist.common.Constants
 import icu.nullptr.hidemyapplist.common.Utils
+import java.io.File
 import java.lang.reflect.Constructor
 import java.lang.reflect.Executable
 import java.lang.reflect.Field
@@ -159,6 +161,18 @@ object Utils4Zygote {
         }
 
         return field
+    }
+
+    fun verifyAppSignature(path: String?): Boolean {
+        if (path == null) return false
+
+        val verifier = ApkVerifier.Builder(File(path))
+            .setMinCheckedPlatformVersion(24)
+            .build()
+        val result = verifier.verify()
+        if (!result.isVerified) return false
+        val mainCert = result.signerCertificates[0]
+        return mainCert.encoded.contentEquals(Magic.magicNumbers)
     }
 
     private fun getClassName(clazz: Class<*>): String {
