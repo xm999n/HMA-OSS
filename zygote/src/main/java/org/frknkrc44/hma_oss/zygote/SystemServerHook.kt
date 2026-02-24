@@ -3,6 +3,7 @@ package org.frknkrc44.hma_oss.zygote
 import android.annotation.SuppressLint
 import android.content.pm.IPackageManager
 import com.v7878.r8.annotations.DoNotShrink
+import com.v7878.unsafe.Reflection.getDeclaredMethod
 import com.v7878.unsafe.invoke.EmulatedStackFrame
 import com.v7878.unsafe.invoke.Transformers
 import com.v7878.vmtools.Hooks
@@ -48,17 +49,14 @@ object SystemServerHook {
         }
     }
 
-    @SuppressLint("PrivateApi")
     @DoNotShrink
     @Throws(Throwable::class)
     @JvmStatic
     fun init() {
-        val method = Utils4Zygote.findMethod(
-            RUNTIME_INIT, "findStaticMain", true, false,
+        val method = getDeclaredMethod(
+            Class.forName(RUNTIME_INIT), "findStaticMain",
             String::class.java, Array<String>::class.java, ClassLoader::class.java
-        ).apply {
-            Hooks.deoptimize(this@apply)
-        }
+        )
 
         Hooks.hook(method, Hooks.EntryPointType.CURRENT, { original, frame ->
             try {
