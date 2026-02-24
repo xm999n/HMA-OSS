@@ -1,4 +1,3 @@
-import com.android.build.gradle.internal.api.BaseVariantOutputImpl
 import com.google.gson.JsonParser
 import org.jose4j.json.internal.json_simple.JSONObject
 import java.io.DataInputStream

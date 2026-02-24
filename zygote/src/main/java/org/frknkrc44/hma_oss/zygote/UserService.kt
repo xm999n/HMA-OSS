@@ -5,7 +5,6 @@ import android.content.pm.IPackageManager
 import android.os.Build
 import android.os.Bundle
 import icu.nullptr.hidemyapplist.common.Constants
-import icu.nullptr.hidemyapplist.common.Utils
 import icu.nullptr.hidemyapplist.common.Utils.getPackageInfoCompat
 import org.frknkrc44.hma_oss.common.BuildConfig
 import org.frknkrc44.hma_oss.zygote.Utils4Zygote.getStaticIntField
@@ -16,8 +15,6 @@ import rikka.hidden.compat.adapter.UidObserverAdapter
 object UserService {
 
     private const val TAG = "HMA-UserService"
-
-
 
     private val uidObserver = object : UidObserverAdapter() {
         override fun onUidActive(uid: Int) {
