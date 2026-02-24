@@ -19,8 +19,8 @@
     <string name="enabled">Ενεργοποιημένο</string>
     <string name="disabled">Απενεργοποιημένο</string>
     <string name="work_mode">Λειτουργία Εργασίας</string>
-    <string name="blacklist">Μαύρη λίστα</string>
-    <string name="whitelist">Λευκή λίστα</string>
+    <string name="blacklist">Λίστα Αποκλεισμένων</string>
+    <string name="whitelist">Λίστα Επιτρεπόμενων</string>
     <string name="application">Εφαρμογή</string>
     <string name="preferences">Προτιμήσεις</string>
     <string name="refresh">Ανανέωση</string>
@@ -196,7 +196,7 @@
     <string name="settings_receive_beta_update">Receive beta update</string>
     <string name="settings_receive_beta_update_summary">Beta version may be unstable</string>
     <!-- Bulk config wizard -->
-    <string name="title_bulk_config_wizard">Bulk config wizard</string>
+    <string name="title_bulk_config_wizard">Οδηγός μαζικής διαμόρφωσης</string>
     <!-- About -->
     <string name="about_description">        Although It is incorrect to detect specific app installation, yet not every app using root provides random package name support. In this case, detected apps that use root (such as Fake Location and Storage Isolation) is equal to detected root itself.\n\nAt the same time, some smart apps use various loopholes to acquire your app list, so that it can draw a persona for you.\n\nThis module provides some methods to test whether you have already hidden your applist nicely. Also, it can work as an Xposed module to hide some apps or reject app list requests to protect your privacy.
     </string>
@@ -209,7 +209,7 @@
     </string>
     <string name="about_translator">Translator</string>
     <string name="about_developer">Developer</string>
-    <string name="about_support">Support and feedback</string>
+    <string name="about_support">Υποστήριξη και ανατροφοδότηση</string>
     <string name="about_open_source">Open source licenses</string>
     <!-- Colors -->
     <string name="color_sakura">Sakura</string>
