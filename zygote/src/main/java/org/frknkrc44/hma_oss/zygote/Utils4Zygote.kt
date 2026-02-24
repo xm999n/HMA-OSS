@@ -22,6 +22,8 @@ import java.util.regex.Pattern
 
 
 object Utils4Zygote {
+    const val TAG = "Utils4Zygote"
+
     fun dumpArgs(frame: EmulatedStackFrame): Array<Any?> {
         return mutableListOf<Any?>().let {
             for (index in 0 ..< frame.type().parameterCount()) {
@@ -75,6 +77,16 @@ object Utils4Zygote {
 
     @Throws(InterruptedException::class)
     fun waitForService(name: String?): IBinder? {
+        try {
+            return getDeclaredMethod(
+                ServiceManager::class.java,
+                "waitForService",
+                String::class.java,
+            ).invoke(null, name) as IBinder?
+        } catch (e: Throwable) {
+            logE(TAG, "An error occurred on waitForService", e)
+        }
+
         var service: IBinder? = null
 
         do {

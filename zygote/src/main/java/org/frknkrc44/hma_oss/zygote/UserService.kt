@@ -76,9 +76,6 @@ object UserService {
             logE(TAG, "Fatal: Cannot get package details\nCompile this app from source with your changes", e)
         }
 
-        val service = HMAService(pms, pmn)
-        service.appUid = appUid
-
         Utils4Zygote.waitForService("activity")
         ActivityManagerApis.registerUidObserver(
             uidObserver,
@@ -88,6 +85,9 @@ object UserService {
         )
 
         logI(TAG, "Registered observer")
+
+        val service = HMAService(pms, pmn)
+        service.appUid = appUid
     }
 
     private fun getActMgrField(name: String) = getStaticIntField(
