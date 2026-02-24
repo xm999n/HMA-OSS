@@ -135,11 +135,11 @@
     <string name="settings_templates_random_ssaid">Random SSAID</string>
     <!-- Logs -->
     <string name="logs_save">Save logs</string>
-    <string name="logs_clear">Clear logs</string>
+    <string name="logs_clear">Εκκαθάριση αρχείων καταγραφής</string>
     <string name="logs_empty">No logs to save</string>
     <string name="logs_saved">Logs saved</string>
     <!-- Filter logs -->
-    <string name="title_filter_logs">Filter logs</string>
+    <string name="title_filter_logs">Φιλτράρισμα αρχείων καταγραφής</string>
     <!-- Settings -->
     <string name="settings_module">Module</string>
     <string name="settings_overwrite">Overwrite</string>
@@ -167,7 +167,7 @@
     <string name="settings_disable_activity_launch_protection">Disable Activity launch protection</string>
     <string name="settings_disable_activity_launch_protection_summary">This toggle will lift all startActivity protections. If you\'re unsure, don\'t enable it.</string>
     <string name="settings_system_wallpaper">Use system wallpaper</string>
-    <string name="settings_clear_uninstalled_app_configs">Clear uninstalled app configs</string>
+    <string name="settings_clear_uninstalled_app_configs">Εκκαθάριση διαμορφώσεων απεγκατεστημένης εφαρμογής</string>
     <string name="settings_clear_uninstalled_app_configs_summary">This option allows you to create a config without remnants but you\'ll have to reconfigure apps when you installed them again.</string>
     <string name="settings_no_undone_warning">This action cannot be undone.</string>
     <string name="settings_package_query_workaround">Alternative package query</string>
@@ -175,8 +175,8 @@
     <string name="settings_launcher_icon">Launcher icon</string>
     <string name="settings_error_only_log">Error-only log</string>
     <string name="settings_language">Language</string>
-    <string name="settings_translate">Participate in translation</string>
-    <string name="settings_translate_summary">Help us translate %s into your language</string>
+    <string name="settings_translate">Συμμετοχή στη μετάφραση</string>
+    <string name="settings_translate_summary">Βοηθήστε μας να μεταφράσουμε το %s στη γλώσσα σας</string>
     <string name="settings_theme">Theme</string>
     <string name="settings_system_theme_color">System theme color</string>
     <string name="settings_theme_color">Theme color</string>
@@ -233,6 +233,6 @@
     <string name="color_blue_grey">Blue grey</string>
     <!-- Dark theme modes -->
     <string name="dark_theme">Dark theme</string>
-    <string name="dark_theme_off">Always off</string>
-    <string name="dark_theme_on">Always on</string>
+    <string name="dark_theme_off">Πάντα απενεργοποιημένο</string>
+    <string name="dark_theme_on">Πάντα ενεργοποιημένο</string>
 </resources>
