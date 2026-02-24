@@ -57,7 +57,7 @@ class AccessibilityHook(private val service: HMAService) : IFrameworkHook {
 
                 logD(TAG, "@${param.methodName} returned empty list for ${callingApps.contentToString()}")
 
-                val returnParcel = param.frame.type().returnType().javaClass == ParceledListSlice::class.java
+                val returnParcel = param.frame.type().returnType().simpleName.contains("Parcel")
                 param.result = if (returnParcel) {
                     ParceledListSlice(returnedList)
                 } else {
