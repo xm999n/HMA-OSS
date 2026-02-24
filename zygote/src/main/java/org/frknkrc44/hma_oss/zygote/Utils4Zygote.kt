@@ -12,6 +12,7 @@ import icu.nullptr.hidemyapplist.common.Constants
 import icu.nullptr.hidemyapplist.common.Utils
 import java.lang.reflect.Constructor
 import java.lang.reflect.Executable
+import java.lang.reflect.Field
 import java.lang.reflect.Method
 import java.lang.reflect.Modifier
 import java.util.function.Predicate
@@ -81,8 +82,18 @@ object Utils4Zygote {
         return service
     }
 
-    fun getPackageNameFromPackageSettings(packageSettings: Any) =
-        callMethod(packageSettings, "getPackageName") as String?
+    fun getPackageNameFromPackageSettings(packageSettings: Any): String? {
+        return try {
+            callMethod(packageSettings, "getPackageName") as String?
+        } catch (_: Throwable) {
+            runCatching {
+                findField(
+                    packageSettings::class.java,
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) "mName" else "name"
+                )?.apply { isAccessible = true }?.get(packageSettings) as? String
+            }.getOrNull()
+        }
+    }
 
     fun getPackageManager() = ActivityThread.currentActivityThread().application.packageManager!!
 
@@ -136,6 +147,18 @@ object Utils4Zygote {
         } else {
             clazz.getMethod(name, *args)
         }
+    }
+
+    fun findField(clazz: Class<*>, name: String): Field? {
+        var currentClazz: Class<*> = clazz
+        var field: Field? = null
+
+        while (field == null && currentClazz.javaClass.simpleName != "Object") {
+            field = runCatching { currentClazz.getField(name) }.getOrNull()
+            currentClazz = clazz.superclass.javaClass
+        }
+
+        return field
     }
 
     private fun getClassName(clazz: Class<*>): String {
