@@ -216,8 +216,6 @@ class BulkHooker private constructor() {
         /**
          * - `args[0] == thisObject`
          * - `args[1:] == function args`
-         *
-         * Note that this variable is null when `dumpArgs == false`
          */
         val args by lazy { Utils4Zygote.dumpArgs(frame) }
 
