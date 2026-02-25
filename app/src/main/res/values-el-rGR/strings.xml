@@ -13,7 +13,7 @@
     <string name="title_about_fork">Σχετικά με αυτό το fork</string>
     <string name="do_not_dual">Μην εγκαταστήσεις το HMA στον δευτερεύων χρήστη</string>
     <string name="show_crash_log">Εμφάνιση αρχείου καταγραφής σφαλμάτων</string>
-    <string name="config_damaged">Το αρχείο ρυθμίσεων είναι κατεστραμμένο. Παρακαλώ καθαρίστε τα δεδομένα της εφαρμογής</string>
+    <string name="config_damaged">Το αρχείο διαμόρφωσης είναι κατεστραμμένο. Παρακαλώ καθαρίστε τα δεδομένα της εφαρμογής</string>
     <string name="edit_list">Επεξεργασία λίστας</string>
     <string name="delete">Διαγραφή</string>
     <string name="enabled">Ενεργοποιημένο</string>
