@@ -103,7 +103,7 @@ class PmsHookTarget34(service: HMAService) : PmsHookTargetBase(service) {
                 if (callingUid == Constants.UID_SYSTEM) return@hookBefore
                 val targetApp = param.getArgument(1).toString()
                 if (service.shouldHideFromUid(callingUid, targetApp) == true) {
-                    param.result = true
+                    param.result = null
                     service.increasePMFilterCount(callingUid)
                     logD(TAG, "@getArchivedPackageInternal caller cache: $callingUid, target: $targetApp")
                     return@hookBefore
