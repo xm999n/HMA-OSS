@@ -28,11 +28,11 @@ class UidPackageNameCache private constructor() {
 
     fun removeCachedAppEntry(packageName: String): Boolean {
         val entry = findCacheEntryByPackageName(packageName) ?: return false
-
-        return if (entry.second.size < 2) {
-            removeCachedUidEntry(entry.first)
-        } else {
-            entry.second.removeIf { it == packageName }
+        var result = entry.second.removeIf { it == packageName }
+        if (entry.second.isEmpty()) {
+            result = removeCachedUidEntry(entry.first) || result
         }
+
+        return result
     }
 }
