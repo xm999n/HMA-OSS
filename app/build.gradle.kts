@@ -122,7 +122,7 @@ android {
     }
 
     base {
-        archivesName = "${rootProject.name}-${defaultConfig.versionName}"
+        archivesName = "${rootProject.name}-${defaultConfig.versionName!!.replace("/", "_")}"
     }
 
     packaging {
