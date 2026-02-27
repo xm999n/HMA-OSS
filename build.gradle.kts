@@ -43,7 +43,7 @@ fun getUncommittedSuffix(): String {
         val branch = "git rev-parse --abbrev-ref HEAD".execute().split("/").last()
         if (branch != "master") {
             returnedVal += "-$branch"
-            returnedVal += "(${System.currentTimeMillis() / 1000})"
+            returnedVal += "-${System.currentTimeMillis() / 1000}"
         }
     } catch (_: Throwable) {}
 
