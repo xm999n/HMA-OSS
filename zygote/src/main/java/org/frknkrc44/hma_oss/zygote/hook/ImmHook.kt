@@ -14,6 +14,7 @@ import org.frknkrc44.hma_oss.zygote.Utils4Zygote
 import org.frknkrc44.hma_oss.zygote.ZygoteConstants.IMM_SERVICE_CLASS
 import org.frknkrc44.hma_oss.zygote.logD
 import org.frknkrc44.hma_oss.zygote.logE
+import org.frknkrc44.hma_oss.zygote.logV
 import java.util.Collections
 
 class ImmHook(private val service: HMAService) : IFrameworkHook {
@@ -46,7 +47,7 @@ class ImmHook(private val service: HMAService) : IFrameworkHook {
                     null,
                 )
             } catch (e: Throwable) {
-                logE(TAG, e.message ?: "", e)
+                logV(TAG, e.message ?: "", e)
             }
         }
 
@@ -79,20 +80,14 @@ class ImmHook(private val service: HMAService) : IFrameworkHook {
 
             hookBefore(
                 IMM_SERVICE_CLASS,
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.VANILLA_ICE_CREAM)
-                    "getInputMethodListInternal"
-                else
-                    "getInputMethodList",
+                "getInputMethodList",
             ) { param ->
                 listHook(param)
             }
 
             hookBefore(
                 IMM_SERVICE_CLASS,
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.VANILLA_ICE_CREAM)
-                    "getEnabledInputMethodListInternal"
-                else
-                    "getEnabledInputMethodList",
+                "getEnabledInputMethodList",
             ) { param ->
                 listHook(param)
             }
@@ -124,18 +119,22 @@ class ImmHook(private val service: HMAService) : IFrameworkHook {
     }
 
     private fun listHook(param: BulkHooker.HookParam) {
-        val callingApps = if (param.methodName.endsWith("Internal")) {
-            val callingUid = param.args.findLast { it is Int } as Int
-            Utils4Zygote.getCallingApps(service, callingUid)
-        } else {
-            Utils4Zygote.getCallingApps(service)
-        }
+        val callingApps = Utils4Zygote.getCallingApps(service)
 
         val caller = callingApps.firstOrNull { callerIsSpoofed(it) }
         if (caller != null) {
             logD(TAG, "@${param.methodName} spoofed input method for $caller")
 
-            param.result = listOf(getFakeInputMethodInfo(caller))
+            listOf(getFakeInputMethodInfo(caller)).let { list ->
+                val returnType = param.frame.type().returnType()
+                param.result = if (returnType.simpleName == "InputMethodInfoSafeList") {
+                    returnType.getDeclaredMethod(
+                        "create",
+                        List::class.java,
+                    ).apply { isAccessible = true }.invoke(null, list)
+                } else { list }
+            }
+
             service.increaseSettingsFilterCount(caller)
         }
     }
