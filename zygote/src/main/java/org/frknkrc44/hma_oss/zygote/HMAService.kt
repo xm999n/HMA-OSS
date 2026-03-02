@@ -655,4 +655,6 @@ class HMAService(val pms: IPackageManager, val pmn: Any?) : IHMAService.Stub() {
 
         writeFilterCount(true)
     }
+
+    override fun getServiceVersionName() = BuildConfig.APP_VERSION_NAME
 }

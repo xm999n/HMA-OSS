@@ -14,10 +14,12 @@ object OSUtils {
         "com.google.android.ext.shared",
     )
 
-    fun collectOSInfo(context: Context) = buildString {
+    fun collectOSInfo(context: Context, serviceVersion: String?) = buildString {
         append("HMA-OSS Log")
-        append("\nApp version: ${BuildConfig.APP_VERSION_NAME} (${BuildConfig.APP_VERSION_CODE})")
-        // TODO: Add service version name
+        append("\nApp version: ")
+        append("${BuildConfig.APP_VERSION_NAME} (${BuildConfig.APP_VERSION_CODE})")
+        append("\nService version: ")
+        append(serviceVersion)
         append("\nFingerprint: ")
         append(Build.FINGERPRINT)
         append("\nAndroid SDK: ")
@@ -36,7 +38,7 @@ object OSUtils {
         append(isPackageExists(context, "com.google.android.apps.customization.pixel"))
 
         PACKAGES_TO_CHECK.forEach {
-            append("Is $it available: ")
+            append("\nIs $it available: ")
             append(isPackageExists(context, it))
         }
     }

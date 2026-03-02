@@ -42,7 +42,12 @@ class LogsFragment : Fragment(R.layout.fragment_logs) {
             contentResolver.openOutputStream(uri).use { output ->
                 if (output == null) showToast(R.string.home_export_failed)
                 else {
-                    output.write(OSUtils.collectOSInfo(requireContext()).toByteArray())
+                    output.write(
+                        OSUtils.collectOSInfo(
+                            requireContext(),
+                            ServiceClient.serviceVersionName,
+                        ).toByteArray()
+                    )
                     output.write("\n\n".toByteArray())
                     output.write(logCache!!.toByteArray())
                 }

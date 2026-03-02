@@ -99,4 +99,12 @@ object ServiceClient : IHMAService, IBinder.DeathRecipient {
     override fun clearFilterStats() {
         service?.clearFilterStats()
     }
+
+    /**
+     * Get the current service `BuildConfig.APP_VERSION_NAME`.
+     * Returns `null` if there is no service connection or an old version is installed.
+     */
+    override fun getServiceVersionName() = try {
+        service?.serviceVersionName
+    } catch (_: Throwable) { null }
 }
