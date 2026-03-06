@@ -24,9 +24,10 @@ import java.util.regex.Pattern
 object Utils4Zygote {
     const val TAG = "Utils4Zygote"
 
-    fun dumpArgs(frame: EmulatedStackFrame): Array<Any?> {
+    fun dumpArgs(frame: EmulatedStackFrame, skipFirst: Boolean = false): Array<Any?> {
         return mutableListOf<Any?>().let {
-            for (index in 0 ..< frame.type().parameterCount()) {
+            val begin = if (skipFirst) 1 else 0
+            for (index in begin ..< frame.type().parameterCount()) {
                 it.add(getArgument(frame, index))
             }
 

@@ -22,21 +22,21 @@ class BulkHooker private constructor() {
     private val hooks: MutableMap<String, MutableList<HookElement>> =
         HashMap<String, MutableList<HookElement>>()
 
-    private fun addPattern(clazz: String, pattern: String, hookFirst: Boolean, paramCount: Int, impl: HookTransformer) {
+    private fun addPattern(clazz: String, pattern: String, hookOnce: Boolean, paramCount: Int, impl: HookTransformer) {
         hooks.computeIfAbsent(clazz) { _ -> mutableListOf() }
             .add(HookElement(
                 impl = impl,
                 pattern = pattern,
-                hookFirst = hookFirst,
+                hookOnce = hookOnce,
                 paramCount = paramCount,
             ))
     }
 
-    private fun addAll(clazz: String, methodName: String, hookFirst: Boolean, paramCount: Int, impl: HookTransformer) {
+    private fun addAll(clazz: String, methodName: String, hookOnce: Boolean, paramCount: Int, impl: HookTransformer) {
         addPattern(
             clazz,
             String.format("%s\\(.*\\).*", Pattern.quote(methodName)),
-            hookFirst,
+            hookOnce,
             paramCount,
             impl,
         )
@@ -46,11 +46,11 @@ class BulkHooker private constructor() {
         clazz: String,
         methodName: String,
         autoApply: Boolean = true,
-        hookFirst: Boolean = true,
+        hookOnce: Boolean = true,
         paramCount: Int = -1,
         hook: (param: HookParam) -> Unit,
     ) {
-        addAll(clazz, methodName, hookFirst, paramCount) { original, frame ->
+        addAll(clazz, methodName, hookOnce, paramCount) { original, frame ->
             val value = ReturnValue()
 
             try {
@@ -84,11 +84,11 @@ class BulkHooker private constructor() {
         clazz: String,
         methodName: String,
         autoApply: Boolean = true,
-        hookFirst: Boolean = true,
+        hookOnce: Boolean = true,
         paramCount: Int = -1,
         hook: (param: HookParam) -> Unit,
     ) {
-        addAll(clazz, methodName, hookFirst, paramCount) { original, frame ->
+        addAll(clazz, methodName, hookOnce, paramCount) { original, frame ->
             val value = ReturnValue()
 
             try {
@@ -137,20 +137,25 @@ class BulkHooker private constructor() {
                     Stream.of<Executable>(*executables)
                         .filter(Utils4Zygote.filter(element.pattern))
                         .forEach { executable: Executable ->
-                            if (element.paramCount != -1 && executable.parameterCount != element.paramCount) {
-                                return@forEach
-                            }
+                            if (!element.hookFinished) {
+                                if (element.paramCount != -1 && executable.parameterCount != element.paramCount) {
+                                    return@forEach
+                                }
 
-                            if (!element.hookFirst || element.applyCount < 1) {
                                 if (BuildConfig.DEBUG) {
                                     logI(TAG, "Hooked: $executable")
                                 }
+
                                 Hooks.hook(
-                                    executable, Hooks.EntryPointType.DIRECT,
+                                    executable, Hooks.EntryPointType.CURRENT,
                                     element.impl, Hooks.EntryPointType.DIRECT
                                 )
 
                                 element.applyCount++
+
+                                if (element.hookOnce) {
+                                    element.hookFinished = true
+                                }
                             }
                         }
                 }
@@ -172,6 +177,10 @@ class BulkHooker private constructor() {
                         logI(TAG, "Invalid hook removed: ${it.pattern}")
                     }
                 }
+            }
+
+            entry.value.forEach {
+                it.hookFinished = true
             }
         }
     }
@@ -228,7 +237,8 @@ class BulkHooker private constructor() {
     data class HookElement(
         val impl: HookTransformer,
         val pattern: String,
-        val hookFirst: Boolean,
+        val hookOnce: Boolean,
+        var hookFinished: Boolean = false,
         val paramCount: Int = -1,
         var applyCount: Int = 0,
     )
