@@ -21,9 +21,7 @@ object SystemServerHook {
 
     @Throws(Throwable::class)
     fun onSystemServer(loader: ClassLoader?) {
-        if (BuildConfig.DEBUG) {
-            logI(TAG, "loader: $loader")
-        }
+        logV(TAG, "Class loader found: $loader")
 
         classLoader = loader
 

@@ -125,9 +125,7 @@ class BulkHooker private constructor() {
 
             for (executable in executables) {
                 if (!element.hookFinished) {
-                    if (BuildConfig.DEBUG) {
-                        logI(TAG, "Hooked: $executable")
-                    }
+                    logD(TAG, "Hooked: $executable")
 
                     val memoryAddresses = Hooks.hook(
                         executable, Hooks.EntryPointType.DIRECT,
