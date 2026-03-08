@@ -1,5 +1,7 @@
 package org.frknkrc44.hma_oss.zygote
 
+import android.os.Build
+import com.v7878.unsafe.ArtMethodUtils
 import com.v7878.unsafe.Reflection
 import com.v7878.unsafe.invoke.EmulatedStackFrame
 import com.v7878.unsafe.invoke.EmulatedStackFrame.RETURN_VALUE_IDX
@@ -9,6 +11,8 @@ import com.v7878.vmtools.Hooks
 import org.frknkrc44.hma_oss.common.BuildConfig
 import org.frknkrc44.hma_oss.zygote.ZygoteEntry.TAG
 import java.lang.invoke.MethodHandle
+import java.lang.reflect.Executable
+import java.lang.reflect.Method
 
 class BulkHooker private constructor() {
     companion object {
@@ -51,7 +55,7 @@ class BulkHooker private constructor() {
 
             if (!value.replace) {
                 try {
-                    Transformers.invokeExactPlain(original, frame)
+                    invokeExactCompat(clazz, methodName, original, frame, value)
                 } catch (it: Throwable) {
                     logE(TAG, it.message ?: "Unknown error on original function", it)
                     value.throwable = it
@@ -77,7 +81,7 @@ class BulkHooker private constructor() {
             val value = ReturnValue()
 
             try {
-                Transformers.invokeExactPlain(original, frame)
+                invokeExactCompat(clazz, methodName, original, frame, value)
             } catch (it: Throwable) {
                 value.throwable = it
             }
@@ -125,10 +129,17 @@ class BulkHooker private constructor() {
                         logI(TAG, "Hooked: $executable")
                     }
 
-                    Hooks.hook(
+                    val memoryAddresses = Hooks.hook(
                         executable, Hooks.EntryPointType.DIRECT,
                         element.impl, Hooks.EntryPointType.DIRECT
                     )
+
+                    logV(TAG, "Memory address map: $memoryAddresses")
+
+                    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
+                        element.memoryAddresses = memoryAddresses
+                        element.method = executable
+                    }
 
                     element.applyCount++
 
@@ -154,6 +165,39 @@ class BulkHooker private constructor() {
         }
 
         return element.hookFinished
+    }
+
+    fun invokeExactCompat(clazz: String, methodName: String, original: MethodHandle, frame: EmulatedStackFrame, value: ReturnValue) {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
+            val element = findHookElement(clazz, methodName)!!
+
+            ArtMethodUtils.setExecutableEntryPoint(
+                element.method!!,
+                element.memoryAddresses?.second!!
+            )
+
+            val thisObject = Utils4Zygote.getArgument(frame, 0)
+            val args = Utils4Zygote.dumpArgs(frame, true)
+
+            value.result = (element.method as Method).invoke(thisObject, *args)
+
+            ArtMethodUtils.setExecutableEntryPoint(
+                element.method!!,
+                element.memoryAddresses?.first!!
+            )
+        } else {
+            Transformers.invokeExactPlain(original, frame)
+        }
+    }
+
+    fun findHookElement(clazz: String, methodName: String): HookElement? {
+        hooks[clazz]?.forEach { element ->
+            if (element.methodName == methodName) {
+                return element
+            }
+        }
+
+        return null
     }
 
     class ReturnValue(initialValue: Any? = null) {
@@ -209,6 +253,8 @@ class BulkHooker private constructor() {
         val impl: HookTransformer,
         val methodName: String,
         val hookOnce: Boolean,
+        var method: Executable? = null,
+        var memoryAddresses: android.util.Pair<Long, Long>? = null,
         var hookFinished: Boolean = false,
         val paramCount: Int = -1,
         var applyCount: Int = 0,
