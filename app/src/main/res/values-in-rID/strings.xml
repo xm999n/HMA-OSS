@@ -62,17 +62,17 @@
     <string name="list_reverse_order">Terbalik</string>
     <string name="list_sort_by_label">Nama apl</string>
     <string name="list_sort_by_package_name">Nama paket</string>
-    <string name="list_sort_by_install_time">Waktu instalasi</string>
+    <string name="list_sort_by_install_time">Waktu pemasangan</string>
     <string name="list_sort_by_update_time">Waktu pembaruan</string>
     <string name="list_empty_no_enabled">Coba aktifkan penyembunyian untuk apl dengan mode kerja templat ini dan apl akan muncul di sini</string>
-    <string name="list_empty_no_apps">Tidak ada apl yang ditemukan, mungkin anda tidak mengizinkan apl ini untuk mengakses semua paket</string>
+    <string name="list_empty_no_apps">Tidak ada apl yang ditemukan, mungkin Anda tidak mengizinkan apl ini untuk mengakses semua paket</string>
     <string name="list_empty_preset">Tidak ada apl yang ditambahkan dalam preset ini</string>
     <!-- Manage templates -->
     <string name="template_usage_hint">Buat templat untuk apl \"bermasalah\", guna mengontrol akses daftar apl.\n\nDaftar hitam (disarankan): apl yang dipilih dalam templat akan tak terlihat dari apl yang menerapkan templat tersebut.\nDaftar putih: apl yang tidak dipilih dalam templat akan tak terlihat oleh apl yang menerapkan templat tersebut.</string>
     <string name="template_new_blacklist">Buat templat daftar hitam</string>
     <string name="template_new_whitelist">Buat templat daftar putih</string>
     <string name="template_new_setting">Buat templat setelan</string>
-    <string name="template_delete">Apakah anda yakin ingin menghapus templat tersebut?</string>
+    <string name="template_delete">Apakah Anda yakin ingin menghapus templat tersebut?</string>
     <string name="template_name">Nama templat</string>
     <string name="template_name_invalid">Nama tidak valid</string>
     <string name="template_delete_title">Hapus Templat</string>
@@ -95,9 +95,9 @@
     <string name="app_extra_apps_visible_count">%d apl tambahan terlihat</string>
     <string name="app_extra_apps_invisible_count">%d apl tambahan tidak terlihat</string>
     <string name="app_warning_risky_package_title">Paket berisiko</string>
-    <string name="app_warning_risky_package_desc">Paket ini ditandai sebagai berisiko dan dapat menyebabkan masalah pada aplikasi tersembunyi. Apakah anda ingin melanjutkan?</string>
+    <string name="app_warning_risky_package_desc">Paket ini ditandai sebagai berisiko dan dapat menyebabkan masalah pada aplikasi tersembunyi. Apakah Anda ingin melanjutkan?</string>
     <string name="app_spoof">Spoofing</string>
-    <string name="app_hide_installation_source">Spoof sumber instalasi</string>
+    <string name="app_hide_installation_source">Spoof sumber pemasangan</string>
     <string name="app_hide_installation_source_desc">Semua apl pengguna akan di-spoof seolah-olah terpasang di Play Store untuk apl ini</string>
     <string name="app_hide_installation_source_system">Spoof apl sistem juga</string>
     <string name="app_hide_installation_source_system_desc">Semua apl sistem akan di-spoof seolah-olah terpasang tanpa alasan apa pun untuk apl ini</string>
@@ -163,20 +163,20 @@
     <string name="settings_hide_icon">Sembunyikan ikon modul di launcher</string>
     <string name="settings_hide_icon_summary">Anda masih dapat membuka apl di manajer Xposed</string>
     <string name="settings_bypass_risky_package_warning">Abaikan paket berisiko</string>
-    <string name="settings_bypass_risky_package_warning_summary">Perlu diketahui bahwa pengembang tidak bertanggung jawab atas masalah terkait paket berisiko sebelum atau setelah anda mengaktifkan fitur ini</string>
+    <string name="settings_bypass_risky_package_warning_summary">Perlu diketahui bahwa pengembang tidak bertanggung jawab atas masalah terkait paket berisiko sebelum atau setelah Anda mengaktifkan fitur ini</string>
     <string name="settings_disable_activity_launch_protection">Nonaktifkan proteksi peluncuran aktivitas</string>
-    <string name="settings_disable_activity_launch_protection_summary">Tombol ini akan menonaktifkan semua proteksi peluncuran aktivitas. Jika anda tidak yakin, jangan aktifkan.</string>
+    <string name="settings_disable_activity_launch_protection_summary">Tombol ini akan menonaktifkan semua proteksi peluncuran aktivitas. Jika Anda tidak yakin, jangan aktifkan.</string>
     <string name="settings_system_wallpaper">Gunakan wallpaper sistem</string>
     <string name="settings_clear_uninstalled_app_configs">Bersihkan konfig apl terhapus</string>
-    <string name="settings_clear_uninstalled_app_configs_summary">Opsi ini memungkinkan anda membuat konfigurasi tanpa sisa tetapi anda harus mengonfigurasi ulang apl saat anda menginstalnya lagi.</string>
+    <string name="settings_clear_uninstalled_app_configs_summary">Opsi ini memungkinkan Anda membuat konfigurasi tanpa sisa tetapi Anda harus mengonfigurasi ulang apl saat Anda memasangnya lagi.</string>
     <string name="settings_no_undone_warning">Tindakan ini tidak dapat dibatalkan.</string>
     <string name="settings_package_query_workaround">Pencarian paket alternatif</string>
     <string name="settings_package_query_workaround_summary">Jangan aktifkan opsi ini jika daftar paket sudah tampil dengan benar.</string>
     <string name="settings_launcher_icon">Ikon aplikasi</string>
     <string name="settings_error_only_log">Log khusus error</string>
     <string name="settings_language">Bahasa</string>
-    <string name="settings_translate">Berpartisipasi dalam penerjemahan</string>
-    <string name="settings_translate_summary">Bantu kami menerjemahkan %s ke bahasa anda</string>
+    <string name="settings_translate">Berpartisipasi dalam terjemahan</string>
+    <string name="settings_translate_summary">Bantu kami menerjemahkan %s ke bahasa Anda</string>
     <string name="settings_theme">Tema</string>
     <string name="settings_system_theme_color">Warna tema sistem</string>
     <string name="settings_theme_color">Warna tema</string>
@@ -189,7 +189,7 @@
     <string name="settings_is_clean_env">Bersihkan lingkungan runtime pada saat yang bersamaan?</string>
     <string name="settings_is_clean_env_summary">Hapus cache layanan sistem di /data/misc/hide_my_applist_*. Setelah mulai ulang berikutnya, Diperlukan membuka apl modul sekali secara manual untuk mengaktifkan intersepsi, dan jumlah intersepsi juga akan dihapus.</string>
     <string name="settings_force_clean_env">Paksa bersihkan lingkungan runtime (root)</string>
-    <string name="settings_force_clean_env_summary">Hanya jika layanan sistem gagal untuk memulai, jika tidak, anda harus mengetuk opsi di atas.</string>
+    <string name="settings_force_clean_env_summary">Hanya jika layanan sistem gagal untuk memulai, jika tidak, Anda harus mengetuk opsi di atas.</string>
     <string name="settings_force_clean_env_toast_successful">Lingkungan runtime dibersihkan</string>
     <string name="settings_update">Pembaruan</string>
     <string name="settings_disable_update">Nonaktifkan notifikasi pembaruan</string>
@@ -198,7 +198,7 @@
     <!-- Bulk config wizard -->
     <string name="title_bulk_config_wizard">Asisten konfigurasi massal</string>
     <!-- About -->
-    <string name="about_description">        Meskipun tidak tepat untuk mendeteksi instalasi aplikasi tertentu, tidak semua aplikasi yang menggunakan root mendukung nama paket acak. Dalam kasus ini, aplikasi terdeteksi yang menggunakan root (seperti Pemalsuan Lokasi dan Isolasi Data) dianggap sama dengan root itu sendiri.\n\nPada saat yang sama, beberapa aplikasi cerdas memanfaatkan celah untuk mendapatkan daftar aplikasi anda, sehingga mereka bisa membangun profil tentang anda.\n\nModul ini menyediakan beberapa metode untuk menguji apakah anda telah menyembunyikan daftar aplikasi dengan baik. Selain itu, dapat berfungsi sebagai modul Xposed untuk menyembunyikan aplikasi tertentu atau menolak permintaan daftar aplikasi guna melindungi privasi anda.
+    <string name="about_description">        Meskipun tidak tepat untuk mendeteksi instalasi aplikasi tertentu, tidak semua aplikasi yang menggunakan root mendukung nama paket acak. Dalam kasus ini, aplikasi terdeteksi yang menggunakan root (seperti Pemalsuan Lokasi dan Isolasi Data) dianggap sama dengan root itu sendiri.\n\nPada saat yang sama, beberapa aplikasi cerdas memanfaatkan celah untuk mendapatkan daftar aplikasi Anda, sehingga mereka bisa membangun profil tentang Anda.\n\nModul ini menyediakan beberapa metode untuk menguji apakah Anda telah menyembunyikan daftar aplikasi dengan baik. Selain itu, dapat berfungsi sebagai modul Xposed untuk menyembunyikan aplikasi tertentu atau menolak permintaan daftar aplikasi guna melindungi privasi Anda.
     </string>
     <string name="about_fork_description">        Proyek HMA asli telah menjadi sumber tertutup dan kode terbaru mereka tidak memuat beberapa perubahan terbaru, jadi saya membuat percabangan ini untuk melanjutkannya sebagai sumber terbuka lagi.
     </string>
