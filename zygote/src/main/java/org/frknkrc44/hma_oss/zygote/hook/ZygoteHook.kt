@@ -7,9 +7,7 @@ import org.frknkrc44.hma_oss.zygote.ZygoteConstants.ZYGOTE_PROCESS_CLASS
 import org.frknkrc44.hma_oss.zygote.logD
 
 class ZygoteHook(private val service: HMAService) : IFrameworkHook {
-    companion object {
-        const val TAG = "ZygoteHook"
-    }
+    override val TAG = "ZygoteHook"
 
     override fun load() {
         BulkHooker.instance.hookBefore(

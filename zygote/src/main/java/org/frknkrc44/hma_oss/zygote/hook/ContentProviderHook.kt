@@ -14,8 +14,9 @@ import org.frknkrc44.hma_oss.zygote.ZygoteConstants.CONTENT_PROVIDER_TRANSPORT_C
 import org.frknkrc44.hma_oss.zygote.logD
 
 class ContentProviderHook(private val service: HMAService): IFrameworkHook {
+    override val TAG = "ContentProviderHook"
+
     companion object {
-        private const val TAG = "ContentProviderHook"
         private val NV_PAIR = arrayOf("name", "value")
     }
 
@@ -62,7 +63,7 @@ class ContentProviderHook(private val service: HMAService): IFrameworkHook {
                 } else {
                     logD(TAG, "@spoofSettings LIST_QUERY received caller: $caller, database: $database")
 
-                    val result = param.result as Cursor? ?: return@hookAfter
+                    val result = param.result as? Cursor? ?: return@hookAfter
 
                     val columns = mutableMapOf<String, MutableList<String?>>().apply {
                         for (i in 0 ..< result.columnCount) {

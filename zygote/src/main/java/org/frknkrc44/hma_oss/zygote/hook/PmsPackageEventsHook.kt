@@ -9,7 +9,7 @@ import org.frknkrc44.hma_oss.zygote.ZygoteConstants.PACKAGE_MANAGER_SERVICE_CLAS
 import org.frknkrc44.hma_oss.zygote.logI
 
 class PmsPackageEventsHook(private val service: HMAService) : IFrameworkHook {
-    val TAG = "PmsPackageEventsHook"
+    override val TAG = "PmsPackageEventsHook"
 
     override fun load() {
         logI(TAG, "Load hook")

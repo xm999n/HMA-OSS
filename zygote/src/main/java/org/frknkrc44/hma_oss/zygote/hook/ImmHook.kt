@@ -17,9 +17,7 @@ import org.frknkrc44.hma_oss.zygote.logV
 import java.util.Collections
 
 class ImmHook(private val service: HMAService) : IFrameworkHook {
-    companion object {
-        private const val TAG = "ImmHook"
-    }
+    override val TAG = "ImmHook"
 
     // TODO: Find a method to get settings activity
     fun getFakeInputMethodInfo(packageName: String): InputMethodInfo {

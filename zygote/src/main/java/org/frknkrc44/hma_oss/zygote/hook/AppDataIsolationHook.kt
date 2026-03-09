@@ -19,9 +19,9 @@ import org.frknkrc44.hma_oss.zygote.logI
 
 @RequiresApi(Build.VERSION_CODES.R)
 class AppDataIsolationHook(private val service: HMAService): IFrameworkHook {
+    override val TAG = "AppDataIsolationHook"
 
     companion object {
-        private const val TAG = "AppDataIsolationHook"
         private const val APPDATA_ISOLATION_ENABLED = "mAppDataIsolationEnabled"
         private const val VOLD_APPDATA_ISOLATION_ENABLED = "mVoldAppDataIsolationEnabled"
         private const val FUSE_PROP = "persist.sys.fuse"

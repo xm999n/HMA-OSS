@@ -22,8 +22,9 @@ import org.frknkrc44.hma_oss.zygote.logI
 import org.frknkrc44.hma_oss.zygote.logV
 
 class ActivityHook(private val service: HMAService) : IFrameworkHook {
+    override val TAG = "ActivityHook"
+
     companion object {
-        private const val TAG = "ActivityHook"
         private val fakeReturnCode by lazy {
             getStaticIntField(
                 "android.app.ActivityManager",

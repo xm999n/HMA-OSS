@@ -19,8 +19,6 @@ import org.frknkrc44.hma_oss.zygote.logV
 import java.util.concurrent.atomic.AtomicReference
 
 abstract class PmsHookTargetBase(protected val service: HMAService) : IFrameworkHook {
-    @Suppress("PropertyName")
-    abstract val TAG: String
 
     protected var lastFilteredApp: AtomicReference<String?> = AtomicReference(null)
 

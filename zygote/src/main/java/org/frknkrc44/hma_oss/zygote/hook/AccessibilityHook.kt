@@ -11,9 +11,7 @@ import org.frknkrc44.hma_oss.zygote.logD
 import org.frknkrc44.hma_oss.zygote.logE
 
 class AccessibilityHook(private val service: HMAService) : IFrameworkHook {
-    companion object {
-        private const val TAG = "AccessibilityHook"
-    }
+    override val TAG = "AccessibilityHook"
 
     override fun load() {
         BulkHooker.instance.apply {

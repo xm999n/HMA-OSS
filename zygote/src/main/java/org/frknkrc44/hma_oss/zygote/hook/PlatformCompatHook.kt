@@ -14,10 +14,7 @@ import org.frknkrc44.hma_oss.zygote.logI
 
 @RequiresApi(Build.VERSION_CODES.R)
 class PlatformCompatHook(private val service: HMAService) : IFrameworkHook {
-
-    companion object {
-        private const val TAG = "PlatformCompatHook"
-    }
+    override val TAG = "PlatformCompatHook"
 
     private val sAppDataIsolationEnabled by lazy {
         PropertyUtils.isAppDataIsolationEnabled || service.config.altAppDataIsolation
