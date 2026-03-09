@@ -11,6 +11,7 @@ import icu.nullptr.hidemyapplist.common.settings_presets.InputMethodPreset
 import org.frknkrc44.hma_oss.zygote.BulkHooker
 import org.frknkrc44.hma_oss.zygote.HMAService
 import org.frknkrc44.hma_oss.zygote.Utils4Zygote
+import org.frknkrc44.hma_oss.zygote.ZygoteConstants.IMM_IMPL_CLASS
 import org.frknkrc44.hma_oss.zygote.ZygoteConstants.IMM_SERVICE_CLASS
 import org.frknkrc44.hma_oss.zygote.logD
 import org.frknkrc44.hma_oss.zygote.logV
@@ -57,60 +58,89 @@ class ImmHook(private val service: HMAService) : IFrameworkHook {
     }
 
     override fun load() {
+        // OEMs (especially Samsung and Xiaomi) messes up whole framework code,
+        // so nothing left except messing up this code
         BulkHooker.instance.apply {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
-                hookBefore(
-                    IMM_SERVICE_CLASS,
-                    "getCurrentInputMethodInfoAsUser",
-                ) { param ->
-                    val callingApps = Utils4Zygote.getCallingApps(service)
+                findAltMethod(
+                    listOf(IMM_SERVICE_CLASS, IMM_IMPL_CLASS),
+                    listOf("getCurrentInputMethodInfoAsUser"),
+                )?.let {
+                    hookBefore(
+                        it.declaringClass.name,
+                        it.name,
+                    ) { param ->
+                        val callingApps = Utils4Zygote.getCallingApps(service)
 
-                    val caller = callingApps.firstOrNull { callerIsSpoofed(it) }
-                    if (caller != null) {
-                        logD(TAG, "@${param.methodName} spoofed input method for $caller")
+                        val caller = callingApps.firstOrNull { callerIsSpoofed(it) }
+                        if (caller != null) {
+                            logD(TAG, "@${param.methodName} spoofed input method for $caller")
 
-                        param.result = getFakeInputMethodInfo(caller)
-                        service.increaseSettingsFilterCount(caller)
+                            param.result = getFakeInputMethodInfo(caller)
+                            service.increaseSettingsFilterCount(caller)
+                        }
                     }
                 }
             }
 
-            hookBefore(
-                IMM_SERVICE_CLASS,
-                "getInputMethodList",
-            ) { param ->
-                listHook(param)
+            findAltMethod(
+                listOf(IMM_SERVICE_CLASS),
+                listOf("getInputMethodList", "getInputMethodListInternal"),
+            )?.let {
+                hookBefore(
+                    it.declaringClass.name,
+                    it.name,
+                ) { param ->
+                    listHook(param)
+                }
             }
 
-            hookBefore(
-                IMM_SERVICE_CLASS,
-                "getEnabledInputMethodList",
-            ) { param ->
-                listHook(param)
+            findAltMethod(
+                listOf(IMM_SERVICE_CLASS),
+                listOf("getEnabledInputMethodList", "getEnabledInputMethodListInternal"),
+            )?.let {
+                hookBefore(
+                    it.declaringClass.name,
+                    it.name,
+                ) { param ->
+                    listHook(param)
+                }
             }
 
-            hookBefore(
-                IMM_SERVICE_CLASS,
-                "getCurrentInputMethodSubtype",
-            ) { param ->
-                subtypeHook(param)
+            findAltMethod(
+                listOf(IMM_SERVICE_CLASS, IMM_IMPL_CLASS),
+                listOf("getCurrentInputMethodSubtype"),
+            )?.let {
+                hookBefore(
+                    it.declaringClass.name,
+                    it.name,
+                ) { param ->
+                    subtypeHook(param)
+                }
             }
 
-            hookBefore(
-                IMM_SERVICE_CLASS,
-                "getLastInputMethodSubtype",
-            ) { param ->
-                subtypeHook(param)
+            findAltMethod(
+                listOf(IMM_SERVICE_CLASS, IMM_IMPL_CLASS),
+                listOf("getLastInputMethodSubtype"),
+            )?.let {
+                hookBefore(
+                    it.declaringClass.name,
+                    it.name,
+                ) { param ->
+                    subtypeHook(param)
+                }
             }
 
-            hookBefore(
-                IMM_SERVICE_CLASS,
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.BAKLAVA)
-                    "getEnabledInputMethodSubtypeListInternal"
-                else
-                    "getEnabledInputMethodSubtypeList",
-            ) { param ->
-                subtypeListHook(param)
+            findAltMethod(
+                listOf(IMM_SERVICE_CLASS, IMM_IMPL_CLASS),
+                listOf("getEnabledInputMethodSubtypeListInternal", "getEnabledInputMethodSubtypeList")
+            )?.let {
+                hookBefore(
+                    it.declaringClass.name,
+                    it.name,
+                ) { param ->
+                    subtypeListHook(param)
+                }
             }
         }
     }
@@ -157,7 +187,16 @@ class ImmHook(private val service: HMAService) : IFrameworkHook {
             logD(TAG, "@${param.methodName} spoofed input method subtype for ${callingApps.contentToString()}")
 
             // TODO: Find a method to get exact list for spoofed input method
-            param.result = Collections.emptyList<InputMethodSubtype>()
+            Collections.emptyList<InputMethodSubtype>().let { list ->
+                val returnType = param.frame.type().returnType()
+                param.result = if (returnType.simpleName == "InputMethodSubtypeSafeList") {
+                    returnType.getDeclaredMethod(
+                        "create",
+                        List::class.java,
+                    ).apply { isAccessible = true }.invoke(null, list)
+                } else { list }
+            }
+
             service.increaseSettingsFilterCount(caller)
         }
     }

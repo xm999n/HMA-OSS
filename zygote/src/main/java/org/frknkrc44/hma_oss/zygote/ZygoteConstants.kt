@@ -10,6 +10,7 @@ object ZygoteConstants {
     const val ACCESSIBILITY_SERVICE_CLASS = "com.android.server.accessibility.AccessibilityManagerService"
     const val CONTENT_PROVIDER_TRANSPORT_CLASS = $$"android.content.ContentProvider$Transport"
     const val IMM_SERVICE_CLASS = "com.android.server.inputmethod.InputMethodManagerService"
+    const val IMM_IMPL_CLASS = "com.android.server.inputmethod.IInputMethodManagerImpl"
     const val PLATFORM_COMPAT_CLASS = "com.android.server.compat.PlatformCompat"
     const val ACTIVITY_STARTER_CLASS = "com.android.server.wm.ActivityStarter"
     const val ACTIVITY_TASK_SUPERVISOR_CLASS = "com.android.server.wm.ActivityTaskSupervisor"

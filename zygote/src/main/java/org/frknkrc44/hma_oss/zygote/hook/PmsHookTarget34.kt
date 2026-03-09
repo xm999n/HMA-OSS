@@ -95,9 +95,15 @@ class PmsHookTarget34(service: HMAService) : PmsHookTargetBase(service) {
 
             // AOSP exploit - https://github.com/aosp-mirror/platform_frameworks_base/commit/5bc482bd99ea18fe0b4064d486b29d5ae2d65139
             // Only 14 QPR2+ has this method
+            // UPDATE: Samsung adds getArchivedPackage instead of getArchivedPackageInternal
+            val altNames = findAltMethod(
+                listOf(PACKAGE_MANAGER_SERVICE_CLASS),
+                listOf("getArchivedPackageInternal", "getArchivedPackage"),
+            ) ?: return@apply
+
             hookBefore(
-                PACKAGE_MANAGER_SERVICE_CLASS,
-                "getArchivedPackageInternal",
+                altNames.declaringClass.name,
+                altNames.name,
             ) { param ->
                 val callingUid = Binder.getCallingUid()
                 if (callingUid == Constants.UID_SYSTEM) return@hookBefore

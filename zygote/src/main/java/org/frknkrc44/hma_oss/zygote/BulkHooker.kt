@@ -207,6 +207,49 @@ class BulkHooker private constructor() {
         return null
     }
 
+    fun findAltMethod(
+        clazzNames: List<String>,
+        methodNames: List<String>,
+        paramCount: Int = -1,
+        loader: ClassLoader? = SystemServerHook.classLoader,
+    ): Executable? {
+        for (clazz in clazzNames) {
+            var curClazz: Class<*>?
+            try {
+                curClazz = Class.forName(clazz, true, loader)
+            } catch (ex: ClassNotFoundException) {
+                logE(TAG, "Class $clazz not found", ex)
+                return null
+            }
+
+            fun findMethods(clazz: Class<*>): List<Executable> {
+                return Reflection.getHiddenExecutables(clazz).filter { executable ->
+                    executable.name in methodNames &&
+                            (paramCount in listOf(-1, executable.parameterCount - 1))
+                }.sortedWith { v1, v2 ->
+                    v1.parameterCount.compareTo(v2.parameterCount)
+                }
+            }
+
+            var methods: List<Executable> = listOf()
+
+            while (
+                methods.isEmpty() &&
+                curClazz != null &&
+                curClazz.javaClass.simpleName != "Object"
+            ) {
+                methods = findMethods(curClazz)
+                curClazz = curClazz.superclass
+            }
+
+            return methods.firstOrNull()
+        }
+
+        logI(TAG, "Invalid hook detected: $clazzNames -> $methodNames($paramCount)")
+
+        return null
+    }
+
     class ReturnValue(initialValue: Any? = null) {
         var replace: Boolean = false
             private set

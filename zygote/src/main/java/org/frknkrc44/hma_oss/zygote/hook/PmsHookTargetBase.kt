@@ -7,6 +7,7 @@ import android.os.UserHandle
 import android.util.ArrayMap
 import icu.nullptr.hidemyapplist.common.Constants
 import icu.nullptr.hidemyapplist.common.Constants.VENDING_PACKAGE_NAME
+import icu.nullptr.hidemyapplist.common.OSUtils
 import icu.nullptr.hidemyapplist.common.Utils
 import org.frknkrc44.hma_oss.zygote.BulkHooker
 import org.frknkrc44.hma_oss.zygote.HMAService
@@ -74,6 +75,34 @@ abstract class PmsHookTargetBase(protected val service: HMAService) : IFramework
                     }
                 }
 
+                // Samsung related fix
+                if (OSUtils.isSamsung()) {
+                    hookBefore(
+                        COMPUTER_ENGINE_CLASS,
+                        "generatePackageInfo",
+                    ) { param ->
+                        val callingUid = Binder.getCallingUid()
+                        val packageSettings = param.getArgument(1)
+                        val targetApp = getPackageNameFromPackageSettings(packageSettings) ?: return@hookBefore
+                        if (service.shouldHideFromUid(callingUid, targetApp) == true) {
+                            param.result = null
+                            service.increasePMFilterCount(callingUid)
+                            logD(TAG, "@generatePackageInfo caller cache: $callingUid, target: $targetApp")
+                            return@hookBefore
+                        }
+                        val callingApps = getCallingApps(service, callingUid)
+                        val caller = callingApps.firstOrNull { service.shouldHide(it, targetApp) }
+                        if (caller != null) {
+                            logD(TAG, "@generatePackageInfo caller: $callingUid $caller, target: $targetApp")
+                            param.result = null
+                            service.putShouldHideUidCache(callingUid, caller, targetApp)
+                            service.increasePMFilterCount(caller)
+                        }
+                    }
+                }
+
+                // Samsung devices can fail to get this hook working,
+                // but it is okay due to generatePackageInfo hook
                 hookBefore(
                     COMPUTER_ENGINE_CLASS,
                     "addPackageHoldingPermissions",
