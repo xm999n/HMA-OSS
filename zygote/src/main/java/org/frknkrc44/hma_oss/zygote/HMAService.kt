@@ -91,8 +91,7 @@ class HMAService(val pms: IPackageManager, val pmn: Any?) : IHMAService.Stub() {
         AppPresets.instance.loggerFunction = { level, msg ->
             logWithLevel(level, "AppPresets", msg)
         }
-
-        reloadPresets()
+        reloadPresetsFromScratch()
     }
 
     private fun searchDataDir() {
@@ -167,7 +166,7 @@ class HMAService(val pms: IPackageManager, val pmn: Any?) : IHMAService.Stub() {
             logW(TAG, "Config version mismatch, need to reload")
             return
         }
-        cleanRemnants(loading)
+        cleanRemnantsFromConfig(loading)
         config = loading
         logI(TAG, "Config loaded")
     }
@@ -186,15 +185,6 @@ class HMAService(val pms: IPackageManager, val pmn: Any?) : IHMAService.Stub() {
         }
         filterHolder = loading
         logI(TAG, "Filter counts loaded")
-    }
-
-    private fun cleanRemnants(config: JsonConfig) {
-        for (app in config.scope.values) {
-            app.applyTemplates.removeIf { !config.templates.containsKey(it) }
-            app.applyPresets.removeIf { !AppPresets.instance.presetNames.contains(it) }
-            app.applySettingTemplates.removeIf { !config.settingsTemplates.containsKey(it) }
-            app.applySettingsPresets.removeIf { !SettingsPresets.instance.presetNames.contains(it) }
-        }
     }
 
     private fun installHooks() {
@@ -237,12 +227,6 @@ class HMAService(val pms: IPackageManager, val pmn: Any?) : IHMAService.Stub() {
     fun increasePMFilterCount(caller: String?, amount: Int = 1) = increaseFilterCount(
         caller, amount, FilterHolder.FilterType.PACKAGE_MANAGER
     )
-
-    /*
-    fun increaseALFilterCount(callingUid: Int?, amount: Int = 1) = increaseFilterCount(
-        callingUid, amount, FilterHolder.FilterType.ACTIVITY_LAUNCH
-    )
-     */
 
     fun increaseALFilterCount(caller: String?, amount: Int = 1) = increaseFilterCount(
         caller, amount, FilterHolder.FilterType.ACTIVITY_LAUNCH
@@ -449,7 +433,7 @@ class HMAService(val pms: IPackageManager, val pmn: Any?) : IHMAService.Stub() {
         synchronized(configLock) {
             runCatching {
                 val newConfig = JsonConfig.parse(json)
-                cleanRemnants(newConfig)
+                cleanRemnantsFromConfig(newConfig)
                 if (newConfig.configVersion != BuildConfig.CONFIG_VERSION) {
                     logW(TAG, "Sync config: version mismatch, need reboot")
                     return
@@ -471,7 +455,7 @@ class HMAService(val pms: IPackageManager, val pmn: Any?) : IHMAService.Stub() {
         writeFilterCount(true)
     }
 
-    fun writeFilterCount(force: Boolean = false) {
+    private fun writeFilterCount(force: Boolean = false) {
         synchronized(configLock) {
             if (!force && totalFilterCount % 100 != 0) {
                 return
@@ -484,6 +468,15 @@ class HMAService(val pms: IPackageManager, val pmn: Any?) : IHMAService.Stub() {
             }.onFailure {
                 return@onFailure
             }
+        }
+    }
+
+    private fun cleanRemnantsFromConfig(config: JsonConfig) {
+        for (app in config.scope.values) {
+            app.applyTemplates.removeIf { !config.templates.containsKey(it) }
+            app.applyPresets.removeIf { !AppPresets.instance.presetNames.contains(it) }
+            app.applySettingTemplates.removeIf { !config.settingsTemplates.containsKey(it) }
+            app.applySettingsPresets.removeIf { !SettingsPresets.instance.presetNames.contains(it) }
         }
     }
 
@@ -586,7 +579,7 @@ class HMAService(val pms: IPackageManager, val pmn: Any?) : IHMAService.Stub() {
 
     override fun getLogFileLocation(): String = logFile.absolutePath
 
-    fun reloadPresets() {
+    override fun reloadPresetsFromScratch() {
         val apps = mutableListOf<ApplicationInfo>().apply {
             binderLocalScope {
                 UserManagerApis.getUserIdsNoThrow().forEach { id ->
@@ -598,8 +591,6 @@ class HMAService(val pms: IPackageManager, val pmn: Any?) : IHMAService.Stub() {
         AppPresets.instance.reloadPresets(apps)
         logI(TAG, "All presets are loaded")
     }
-
-    override fun reloadPresetsFromScratch() = reloadPresets()
 
     override fun getDetailedFilterStats() = filterHolder.toString()
 
