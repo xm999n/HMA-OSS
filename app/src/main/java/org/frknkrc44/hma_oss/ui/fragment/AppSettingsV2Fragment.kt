@@ -48,7 +48,7 @@ class AppSettingsV2Fragment : Fragment(R.layout.fragment_settings) {
     }
 
     private val binding by viewBinding(FragmentSettingsBinding::bind)
-    private val viewModel by viewModels<AppSettingsViewModel>() {
+    private val viewModel by viewModels<AppSettingsViewModel> {
         val args by navArgs<AppSettingsV2FragmentArgs>()
         val cfg: JsonConfig.AppConfig? = if (args.bulkConfigMode) {
             if (args.bulkConfig != null) JsonConfig.AppConfig.parse(args.bulkConfig!!)
@@ -308,17 +308,17 @@ class AppSettingsV2Fragment : Fragment(R.layout.fragment_settings) {
             preferenceManager.preferenceDataStore = preferenceDataStore
             setPreferencesFromResource(R.xml.app_settings_spoofing_v2, rootKey)
 
-            findPreference<SwitchPreferenceCompat>("hideInstallationSource")?.setOnPreferenceChangeListener { _, newValue ->
+            findPreference<SwitchPreferenceCompat>("hideInstallationSource")?.setOnPreferenceChangeListener { _, _ ->
                 Toast.makeText(requireContext(),
                     R.string.app_force_stop_warning, Toast.LENGTH_LONG).show()
                 true
             }
-            findPreference<SwitchPreferenceCompat>("hideSystemInstallationSource")?.setOnPreferenceChangeListener { _, newValue ->
+            findPreference<SwitchPreferenceCompat>("hideSystemInstallationSource")?.setOnPreferenceChangeListener { _, _ ->
                 Toast.makeText(requireContext(),
                     R.string.app_force_stop_warning, Toast.LENGTH_LONG).show()
                 true
             }
-            findPreference<SwitchPreferenceCompat>("excludeTargetInstallationSource")?.setOnPreferenceChangeListener { _, newValue ->
+            findPreference<SwitchPreferenceCompat>("excludeTargetInstallationSource")?.setOnPreferenceChangeListener { _, _ ->
                 Toast.makeText(requireContext(),
                     R.string.app_force_stop_warning, Toast.LENGTH_LONG).show()
                 true
@@ -335,7 +335,7 @@ class AppSettingsV2Fragment : Fragment(R.layout.fragment_settings) {
                 getString(R.string.app_template_using, pack.config.applyTemplates.size)
         }
 
-        private fun updateApplyPresets(useWhitelist: Boolean = pack.config.useWhitelist) {
+        private fun updateApplyPresets() {
             findPreference<Preference>("applyPresets")?.title =
                 getString(R.string.app_preset_using, pack.config.applyPresets.size)
         }
@@ -362,6 +362,7 @@ class AppSettingsV2Fragment : Fragment(R.layout.fragment_settings) {
                 else getString(R.string.app_extra_apps_invisible_count, pack.config.extraOppositeAppList.size)
         }
 
+        @SuppressLint("DiscouragedApi")
         override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
             preferenceManager.preferenceDataStore = preferenceDataStore
             setPreferencesFromResource(R.xml.app_settings_template_config_v2, rootKey)
