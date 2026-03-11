@@ -57,7 +57,7 @@ class BulkHooker private constructor() {
                 try {
                     invokeExactCompat(clazz, methodName, original, frame, value)
                 } catch (it: Throwable) {
-                    logE(TAG, it.message ?: "Unknown error on original function", it)
+                    logD(TAG, it.message ?: "Unknown error on original function", it)
                     value.throwable = it
                 }
             }
@@ -87,7 +87,7 @@ class BulkHooker private constructor() {
             try {
                 invokeExactCompat(clazz, methodName, original, frame, value)
             } catch (it: Throwable) {
-                logE(TAG, it.message ?: "Unknown error on original function", it)
+                logD(TAG, it.message ?: "Unknown error on original function", it)
                 value.throwable = it
             }
 

@@ -186,10 +186,6 @@ object Utils4Zygote {
     }
 
     fun clearStackTraces(throwableIn: Throwable) {
-        if (BuildConfig.DEBUG) {
-            logI(TAG, "@clearStackTraces: Skipped due to debug version")
-        }
-
         var throwable: Throwable? = throwableIn
 
         while (throwable != null) {
@@ -199,6 +195,11 @@ object Utils4Zygote {
                     "BulkHooker",
                     "com.v7878",
                     "MethodHandle",
+                    BuildConfig.APP_PACKAGE_NAME,
+                ) && !Utils.containsMultiple(
+                    item.fileName,
+                    "r8-map-id-",
+                    "dex-id-",
                 )
             }
 
