@@ -51,7 +51,7 @@
     <string name="home_import_failed">Impor gagal</string>
     <string name="home_import_app_version_too_old">Versi modul lebih rendah dari versi cadangan</string>
     <string name="home_import_backup_version_too_old">Versi cadangan terlalu lama</string>
-    <string name="home_import_file_damaged">File cadangan rusak</string>
+    <string name="home_import_file_damaged">Berkas cadangan rusak</string>
     <string name="home_export_failed">Ekspor gagal</string>
     <string name="home_exported">Konfig dicadangkan</string>
     <string name="home_new_update">Pembaruan tersedia: %s</string>
@@ -68,7 +68,7 @@
     <string name="list_empty_no_apps">Tidak ada apl yang ditemukan, mungkin Anda tidak mengizinkan apl ini untuk mengakses semua paket</string>
     <string name="list_empty_preset">Tidak ada apl yang ditambahkan dalam preset ini</string>
     <!-- Manage templates -->
-    <string name="template_usage_hint">Buat templat untuk apl \"bermasalah\", guna mengontrol akses daftar apl.\n\nDaftar hitam (disarankan): apl yang dipilih dalam templat akan tak terlihat dari apl yang menerapkan templat tersebut.\nDaftar putih: apl yang tidak dipilih dalam templat akan tak terlihat oleh apl yang menerapkan templat tersebut.</string>
+    <string name="template_usage_hint">Buat templat untuk apl \"bermasalah\", guna mengontrol akses daftar apl.\n\nDaftar hitam (disarankan): apl yang dipilih dalam templat tidak akan terlihat dari apl yang menerapkan templat tersebut.\nDaftar putih: apl yang tidak dipilih dalam templat tidak akan terlihat oleh apl yang menerapkan templat tersebut.</string>
     <string name="template_new_blacklist">Buat templat daftar hitam</string>
     <string name="template_new_whitelist">Buat templat daftar putih</string>
     <string name="template_new_setting">Buat templat setelan</string>
