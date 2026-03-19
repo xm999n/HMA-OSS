@@ -107,4 +107,6 @@ object ServiceClient : IHMAService, IBinder.DeathRecipient {
     override fun getServiceVersionName() = try {
         service?.serviceVersionName
     } catch (_: Throwable) { null }
+
+    override fun getLoadedHooks() = service?.loadedHooks
 }

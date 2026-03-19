@@ -81,6 +81,12 @@
             app:singleLineTitle="false"
             android:title="@string/settings_disable_activity_launch_protection"
             android:summary="@string/settings_disable_activity_launch_protection_summary" />
+        <MultiSelectListPreference
+            android:icon="@drawable/syringe_24px"
+            android:key="disableHooks"
+            app:singleLineTitle="false"
+            android:title="@string/settings_disable_hooks"
+            android:summary="@string/settings_disable_hooks_summary" />
         <Preference
             android:icon="@drawable/outline_storage_24"
             android:key="dataIsolation"

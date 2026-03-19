@@ -141,6 +141,15 @@ object ConfigManager {
             PackageHelper.invalidateCache()
         }
 
+    var disabledHooks: List<JsonConfig.HookItem>
+        get() = config.disabledHooks
+        set(elements) {
+            config.disabledHooks.clear()
+            config.disabledHooks.addAll(elements)
+            saveConfig()
+            showToast(R.string.settings_need_reboot)
+        }
+
     fun importConfig(json: String) {
         config = JsonConfig.parse(json)
         config.configVersion = BuildConfig.CONFIG_VERSION

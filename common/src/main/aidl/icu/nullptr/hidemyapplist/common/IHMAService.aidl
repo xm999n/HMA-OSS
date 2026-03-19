@@ -41,4 +41,6 @@ interface IHMAService {
 
     // service version
     String getServiceVersionName() = 18;
+
+    String[] getLoadedHooks() = 19;
 }

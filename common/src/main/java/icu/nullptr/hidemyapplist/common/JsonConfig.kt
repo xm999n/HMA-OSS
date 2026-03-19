@@ -19,6 +19,7 @@ data class JsonConfig(
     var packageQueryWorkaround: Boolean = false,
     val templates: MutableMap<String, Template> = mutableMapOf(),
     val settingsTemplates: MutableMap<String, SettingsTemplate> = mutableMapOf(),
+    val disabledHooks: MutableList<HookItem> = mutableListOf(),
     val scope: MutableMap<String, AppConfig> = mutableMapOf()
 ) {
     @Serializable
@@ -60,10 +61,23 @@ data class JsonConfig(
         }
     }
 
+    @Serializable
+    data class HookItem(
+        val className: String,
+        val methodName: String,
+        val argumentCount: Int,
+    ) {
+        override fun toString() = encoder.encodeToString(this)
+
+        companion object {
+            fun parse(json: String) = encoder.decodeFromString<HookItem>(json)
+        }
+    }
+
     companion object {
         fun parse(json: String) = encoder.decodeFromString<JsonConfig>(json)
 
-        private val encoder = Json {
+        val encoder = Json {
             encodeDefaults = true
             ignoreUnknownKeys = true
         }

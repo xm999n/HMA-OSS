@@ -22,9 +22,20 @@ class BulkHooker private constructor() {
         val instance: BulkHooker by lazy { BulkHooker() }
     }
 
-    private val hooks: MutableMap<String, MutableList<HookElement>> = HashMap()
+    internal val hooks: MutableMap<String, MutableList<HookElement>> = HashMap()
 
     private fun addHook(clazz: String, methodName: String, hookOnce: Boolean, paramCount: Int, impl: HookTransformer) {
+        val inDisabledHooks = HMAService.instance?.config?.disabledHooks?.any {
+            clazz == it.className &&
+                    methodName == it.methodName &&
+                    paramCount == it.argumentCount
+        }
+
+        if (inDisabledHooks == true) {
+            logI(ZygoteEntry.TAG, "Disabled hook: $clazz -> $methodName($paramCount)")
+            return
+        }
+
         val element = HookElement(
             impl = impl,
             methodName = methodName,

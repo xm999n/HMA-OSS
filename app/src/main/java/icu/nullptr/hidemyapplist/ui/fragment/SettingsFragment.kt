@@ -11,6 +11,7 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.flowWithLifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.preference.ListPreference
+import androidx.preference.MultiSelectListPreference
 import androidx.preference.Preference
 import androidx.preference.PreferenceDataStore
 import androidx.preference.PreferenceFragmentCompat
@@ -20,6 +21,7 @@ import com.google.android.material.color.DynamicColors
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import dev.androidbroadcast.vbpd.viewBinding
 import icu.nullptr.hidemyapplist.common.Constants
+import icu.nullptr.hidemyapplist.common.JsonConfig
 import icu.nullptr.hidemyapplist.common.PropertyUtils
 import icu.nullptr.hidemyapplist.hmaApp
 import icu.nullptr.hidemyapplist.service.ConfigManager
@@ -120,6 +122,13 @@ class SettingsFragment : Fragment(R.layout.fragment_settings), PreferenceFragmen
             }
         }
 
+        override fun getStringSet(key: String?, defValues: Set<String>?): Set<String> {
+            return when (key) {
+                "disableHooks" -> ConfigManager.disabledHooks.map { it.toString() }.toSet()
+                else -> throw IllegalArgumentException("Invalid key: $key")
+            }
+        }
+
         override fun putBoolean(key: String, value: Boolean) {
             when (key) {
                 "followSystemAccent" -> PrefManager.followSystemAccent = value
@@ -153,6 +162,13 @@ class SettingsFragment : Fragment(R.layout.fragment_settings), PreferenceFragmen
         override fun putInt(key: String, value: Int) {
             when (key) {
                 "systemWallpaperAlpha" -> PrefManager.systemWallpaperAlpha = value
+                else -> throw IllegalArgumentException("Invalid key: $key")
+            }
+        }
+
+        override fun putStringSet(key: String, values: Set<String>?) {
+            when (key) {
+                "disableHooks" -> ConfigManager.disabledHooks = values?.map { JsonConfig.HookItem.parse(it) } ?: listOf()
                 else -> throw IllegalArgumentException("Invalid key: $key")
             }
         }
@@ -390,6 +406,23 @@ class SettingsFragment : Fragment(R.layout.fragment_settings), PreferenceFragmen
             }
 
             configureDataIsolation()
+
+            findPreference<MultiSelectListPreference>("disableHooks")?.apply {
+                val allHooks = (ConfigManager.disabledHooks + (ServiceClient.loadedHooks?.map { JsonConfig.HookItem.parse(it) } ?: listOf())).let {
+                    it.sortedWith { item1, item2 ->
+                        fun JsonConfig.HookItem.comparator() = "${className.substringAfterLast('.')}##$methodName"
+
+                        item1.comparator().compareTo(item2.comparator())
+                    }
+                }
+
+                entries = allHooks.map {
+                    val displayedArgCount = if (it.argumentCount >= 0) { "${it.argumentCount} args" } else { "..." }
+
+                    "${it.className.substringAfterLast('.')} -> ${it.methodName}($displayedArgCount)"
+                }.toTypedArray()
+                entryValues = allHooks.map { it.toString() }.toTypedArray()
+            }
 
             findPreference<Preference>("stopSystemService")?.setOnPreferenceClickListener {
                 if (ServiceClient.serviceVersion != 0) {

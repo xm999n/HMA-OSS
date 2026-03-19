@@ -599,4 +599,22 @@ class HMAService(val pms: IPackageManager, val pmn: Any?) : IHMAService.Stub() {
     }
 
     override fun getServiceVersionName() = BuildConfig.APP_VERSION_NAME
+
+    override fun getLoadedHooks(): Array<String> {
+        val hookList = mutableListOf<String>()
+
+        for ((className, hookElements) in BulkHooker.instance.hooks) {
+            for (element in hookElements) {
+                hookList.add(
+                    JsonConfig.HookItem(
+                        className,
+                        element.methodName,
+                        element.paramCount,
+                    ).toString()
+                )
+            }
+        }
+
+        return hookList.toTypedArray()
+    }
 }
