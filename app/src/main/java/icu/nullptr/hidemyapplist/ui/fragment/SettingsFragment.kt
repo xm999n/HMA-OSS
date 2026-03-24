@@ -272,7 +272,7 @@ class SettingsFragment : Fragment(R.layout.fragment_settings), PreferenceFragmen
                     it.summary = if (!TextUtils.isEmpty(locale.script)) locale.getDisplayScript(userLocale) else locale.getDisplayName(userLocale)
                 }
                 it.setOnPreferenceChangeListener { _, newValue ->
-                    val locale = getLocale()
+                    val locale = getLocale(newValue as String)
                     val config = resources.configuration
                     config.setLocale(locale)
                     hmaApp.resources.updateConfiguration(config, resources.displayMetrics)
