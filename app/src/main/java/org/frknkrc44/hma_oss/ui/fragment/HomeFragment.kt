@@ -25,6 +25,7 @@ import icu.nullptr.hidemyapplist.ui.util.ThemeUtils.getColor
 import icu.nullptr.hidemyapplist.ui.util.ThemeUtils.homeItemBackgroundColor
 import icu.nullptr.hidemyapplist.ui.util.ThemeUtils.themeColor
 import icu.nullptr.hidemyapplist.ui.util.contentResolver
+import icu.nullptr.hidemyapplist.ui.util.isTestBuild
 import icu.nullptr.hidemyapplist.ui.util.navigate
 import icu.nullptr.hidemyapplist.ui.util.setEdge2EdgeFlags
 import icu.nullptr.hidemyapplist.ui.util.setupToolbar
@@ -330,7 +331,7 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
     }
 
     private fun loadUpdateDialog() {
-        if (hmaApp.updateDialogSkipped || PrefManager.disableUpdate || BuildConfig.VERSION_NAME.count { it == '-' } != 1) return
+        if (hmaApp.updateDialogSkipped || PrefManager.disableUpdate || isTestBuild) return
         fetchLatestUpdate { updateInfo ->
             if (updateInfo.versionName != BuildConfig.VERSION_NAME) {
                 withContext(Dispatchers.Main) {
