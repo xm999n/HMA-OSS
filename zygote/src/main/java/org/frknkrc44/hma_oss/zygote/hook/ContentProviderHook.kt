@@ -10,9 +10,9 @@ import android.provider.Settings
 import org.frknkrc44.hma_oss.zygote.service.BulkHooker
 import org.frknkrc44.hma_oss.zygote.service.HMAService
 import org.frknkrc44.hma_oss.zygote.service.HookParam
+import org.frknkrc44.hma_oss.zygote.util.Logcat.logD
 import org.frknkrc44.hma_oss.zygote.util.Utils4Zygote
 import org.frknkrc44.hma_oss.zygote.util.ZygoteConstants.CONTENT_PROVIDER_TRANSPORT_CLASS
-import org.frknkrc44.hma_oss.zygote.util.Logcat.logD
 
 class ContentProviderHook(private val service: HMAService): IFrameworkHook {
     override val TAG = "ContentProviderHook"

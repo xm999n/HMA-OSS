@@ -11,13 +11,13 @@ import icu.nullptr.hidemyapplist.common.OSUtils
 import icu.nullptr.hidemyapplist.common.Utils
 import org.frknkrc44.hma_oss.zygote.service.BulkHooker
 import org.frknkrc44.hma_oss.zygote.service.HMAService
+import org.frknkrc44.hma_oss.zygote.service.HMAServiceCache
+import org.frknkrc44.hma_oss.zygote.util.Logcat.logD
+import org.frknkrc44.hma_oss.zygote.util.Logcat.logV
 import org.frknkrc44.hma_oss.zygote.util.Utils4Zygote.callMethod
 import org.frknkrc44.hma_oss.zygote.util.Utils4Zygote.getCallingApps
 import org.frknkrc44.hma_oss.zygote.util.Utils4Zygote.getPackageNameFromPackageSettings
 import org.frknkrc44.hma_oss.zygote.util.ZygoteConstants.COMPUTER_ENGINE_CLASS
-import org.frknkrc44.hma_oss.zygote.util.Logcat.logD
-import org.frknkrc44.hma_oss.zygote.util.Logcat.logV
-import org.frknkrc44.hma_oss.zygote.service.HMAServiceCache
 import java.util.concurrent.atomic.AtomicReference
 
 abstract class PmsHookTargetBase(protected val service: HMAService) : IFrameworkHook {

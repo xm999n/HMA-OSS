@@ -14,7 +14,6 @@ import icu.nullptr.hidemyapplist.common.app_presets.RootAppsPreset
 import icu.nullptr.hidemyapplist.common.app_presets.SDhizukuAppsPreset
 import icu.nullptr.hidemyapplist.common.app_presets.SuspiciousAppsPreset
 import icu.nullptr.hidemyapplist.common.app_presets.XposedModulesPreset
-import org.frknkrc44.hma_oss.common.BuildConfig
 import java.util.zip.ZipFile
 
 class AppPresets private constructor() {

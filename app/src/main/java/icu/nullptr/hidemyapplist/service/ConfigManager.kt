@@ -2,9 +2,9 @@ package icu.nullptr.hidemyapplist.service
 
 import android.os.Build
 import android.util.Log
+import icu.nullptr.hidemyapplist.MyApp.Companion.hmaApp
 import icu.nullptr.hidemyapplist.common.JsonConfig
 import icu.nullptr.hidemyapplist.common.settings_presets.ReplacementItem
-import icu.nullptr.hidemyapplist.hmaApp
 import icu.nullptr.hidemyapplist.ui.util.showToast
 import icu.nullptr.hidemyapplist.util.PackageHelper
 import org.frknkrc44.hma_oss.R

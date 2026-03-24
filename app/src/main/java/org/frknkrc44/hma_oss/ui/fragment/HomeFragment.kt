@@ -15,6 +15,7 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import dev.androidbroadcast.vbpd.viewBinding
+import icu.nullptr.hidemyapplist.MyApp.Companion.hmaApp
 import icu.nullptr.hidemyapplist.data.fetchLatestUpdate
 import icu.nullptr.hidemyapplist.service.ConfigManager
 import icu.nullptr.hidemyapplist.service.PrefManager
@@ -329,7 +330,7 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
     }
 
     private fun loadUpdateDialog() {
-        if (PrefManager.disableUpdate || BuildConfig.VERSION_NAME.count { it == '-' } != 1) return
+        if (hmaApp.updateDialogSkipped || PrefManager.disableUpdate || BuildConfig.VERSION_NAME.count { it == '-' } != 1) return
         fetchLatestUpdate { updateInfo ->
             if (updateInfo.versionName != BuildConfig.VERSION_NAME) {
                 withContext(Dispatchers.Main) {
@@ -346,6 +347,9 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
                             )
                         }
                         .setNegativeButton(android.R.string.cancel, null)
+                        .setOnDismissListener {
+                            hmaApp.updateDialogSkipped = true
+                        }
                         .show()
                 }
             }

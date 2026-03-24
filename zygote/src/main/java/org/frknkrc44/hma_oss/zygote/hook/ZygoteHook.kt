@@ -3,8 +3,8 @@ package org.frknkrc44.hma_oss.zygote.hook
 import icu.nullptr.hidemyapplist.common.Constants
 import org.frknkrc44.hma_oss.zygote.service.BulkHooker
 import org.frknkrc44.hma_oss.zygote.service.HMAService
-import org.frknkrc44.hma_oss.zygote.util.ZygoteConstants.ZYGOTE_PROCESS_CLASS
 import org.frknkrc44.hma_oss.zygote.util.Logcat.logD
+import org.frknkrc44.hma_oss.zygote.util.ZygoteConstants.ZYGOTE_PROCESS_CLASS
 
 class ZygoteHook(private val service: HMAService) : IFrameworkHook {
     override val TAG = "ZygoteHook"

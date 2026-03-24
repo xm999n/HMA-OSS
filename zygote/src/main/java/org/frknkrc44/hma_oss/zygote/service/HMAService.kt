@@ -25,7 +25,6 @@ import icu.nullptr.hidemyapplist.common.Utils.removeIf
 import icu.nullptr.hidemyapplist.common.app_presets.DetectorAppsPreset
 import icu.nullptr.hidemyapplist.common.settings_presets.ReplacementItem
 import org.frknkrc44.hma_oss.common.BuildConfig
-import org.frknkrc44.hma_oss.zygote.util.Utils4Zygote.verifyAppSignature
 import org.frknkrc44.hma_oss.zygote.hook.AccessibilityHook
 import org.frknkrc44.hma_oss.zygote.hook.ActivityHook
 import org.frknkrc44.hma_oss.zygote.hook.AppDataIsolationHook
@@ -45,13 +44,13 @@ import org.frknkrc44.hma_oss.zygote.util.Logcat.logE
 import org.frknkrc44.hma_oss.zygote.util.Logcat.logI
 import org.frknkrc44.hma_oss.zygote.util.Logcat.logW
 import org.frknkrc44.hma_oss.zygote.util.Logcat.logWithLevel
+import org.frknkrc44.hma_oss.zygote.util.Utils4Zygote.verifyAppSignature
 import rikka.hidden.compat.ActivityManagerApis
 import rikka.hidden.compat.UserManagerApis
 import java.io.File
 import java.lang.reflect.Modifier
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
-import kotlin.collections.get
 
 class HMAService(val pms: IPackageManager, val pmn: Any?) : IHMAService.Stub() {
 

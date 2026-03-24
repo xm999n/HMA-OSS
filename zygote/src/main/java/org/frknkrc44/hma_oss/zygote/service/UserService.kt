@@ -7,12 +7,12 @@ import android.os.Bundle
 import icu.nullptr.hidemyapplist.common.Constants
 import icu.nullptr.hidemyapplist.common.Utils.getPackageInfoCompat
 import org.frknkrc44.hma_oss.common.BuildConfig
-import org.frknkrc44.hma_oss.zygote.util.Utils4Zygote
-import org.frknkrc44.hma_oss.zygote.util.Utils4Zygote.getStaticIntField
-import org.frknkrc44.hma_oss.zygote.util.Utils4Zygote.verifyAppSignature
 import org.frknkrc44.hma_oss.zygote.util.Logcat.logD
 import org.frknkrc44.hma_oss.zygote.util.Logcat.logE
 import org.frknkrc44.hma_oss.zygote.util.Logcat.logI
+import org.frknkrc44.hma_oss.zygote.util.Utils4Zygote
+import org.frknkrc44.hma_oss.zygote.util.Utils4Zygote.getStaticIntField
+import org.frknkrc44.hma_oss.zygote.util.Utils4Zygote.verifyAppSignature
 import rikka.hidden.compat.ActivityManagerApis
 import rikka.hidden.compat.adapter.UidObserverAdapter
 

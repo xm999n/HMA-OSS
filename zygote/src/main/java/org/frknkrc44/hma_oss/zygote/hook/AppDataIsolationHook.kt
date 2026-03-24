@@ -6,6 +6,9 @@ import androidx.annotation.RequiresApi
 import org.frknkrc44.hma_oss.common.BuildConfig
 import org.frknkrc44.hma_oss.zygote.service.BulkHooker
 import org.frknkrc44.hma_oss.zygote.service.HMAService
+import org.frknkrc44.hma_oss.zygote.util.Logcat.logD
+import org.frknkrc44.hma_oss.zygote.util.Logcat.logE
+import org.frknkrc44.hma_oss.zygote.util.Logcat.logI
 import org.frknkrc44.hma_oss.zygote.util.Utils4Zygote
 import org.frknkrc44.hma_oss.zygote.util.Utils4Zygote.getBooleanField
 import org.frknkrc44.hma_oss.zygote.util.Utils4Zygote.getIntField
@@ -13,9 +16,6 @@ import org.frknkrc44.hma_oss.zygote.util.Utils4Zygote.getObjectField
 import org.frknkrc44.hma_oss.zygote.util.Utils4Zygote.setBooleanField
 import org.frknkrc44.hma_oss.zygote.util.ZygoteConstants.PROCESS_LIST_CLASS
 import org.frknkrc44.hma_oss.zygote.util.ZygoteConstants.STORAGE_MANAGER_SERVICE_CLASS
-import org.frknkrc44.hma_oss.zygote.util.Logcat.logD
-import org.frknkrc44.hma_oss.zygote.util.Logcat.logE
-import org.frknkrc44.hma_oss.zygote.util.Logcat.logI
 import java.util.Map
 
 @RequiresApi(Build.VERSION_CODES.R)
