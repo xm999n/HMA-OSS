@@ -37,6 +37,7 @@ class DetectorAppsPreset  : BasePreset(NAME) {
         "com.chuqniudetector",
         "com.chunqiudetector",
         "com.longz.detector",
+        "com.anycheck.app",
 
         // Add more detector apps (thanks @Yurii0307)
         "com.lingqing.detector",
