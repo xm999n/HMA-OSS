@@ -18,7 +18,6 @@ import icu.nullptr.hidemyapplist.common.SettingsPresets
 import icu.nullptr.hidemyapplist.common.Utils.binderLocalScope
 import icu.nullptr.hidemyapplist.common.Utils.generateRandomString
 import icu.nullptr.hidemyapplist.common.Utils.getInstalledApplicationsCompat
-import icu.nullptr.hidemyapplist.common.Utils.getInstalledPackagesCompat
 import icu.nullptr.hidemyapplist.common.Utils.getPackageInfoCompat
 import icu.nullptr.hidemyapplist.common.Utils.getPackageUidCompat
 import icu.nullptr.hidemyapplist.common.Utils.removeIf
@@ -547,7 +546,7 @@ class HMAService(val pms: IPackageManager, val pmn: Any?) : IHMAService.Stub() {
     }
 
     override fun getPackageNames(userId: Int) = binderLocalScope {
-        getInstalledPackagesCompat(pms, 0L, userId).map { it.packageName }.toTypedArray()
+        getInstalledApplicationsCompat(pms, 0L, userId).map { it.packageName }.toTypedArray()
     }
 
     override fun getPackageInfo(
