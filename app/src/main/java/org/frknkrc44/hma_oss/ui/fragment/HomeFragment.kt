@@ -103,28 +103,6 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         setEdge2EdgeFlags(binding.root)
     }
 
-    fun waitForService() {
-        var serviceVersion = ServiceClient.serviceVersion
-        if (serviceVersion > 0) {
-            loadEnabledIndicator()
-            return
-        }
-
-        thread {
-            var count = 0
-
-            while (ServiceClient.serviceVersion.also { serviceVersion = it } <= 0 && count++ < 100) {
-                Thread.sleep(100)
-            }
-
-            if (serviceVersion > 0) {
-                lifecycleScope.launch {
-                    loadEnabledIndicator()
-                }
-            }
-        }
-    }
-
     override fun onStart() {
         super.onStart()
 
@@ -310,8 +288,29 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         }
     }
 
-    fun loadEnabledIndicator() {
-        val serviceVersion = ServiceClient.serviceVersion
+    fun waitForService() {
+        var serviceVersion = ServiceClient.serviceVersion
+        loadEnabledIndicator(serviceVersion)
+        if (serviceVersion > 0) {
+            return
+        }
+
+        thread {
+            var count = 0
+
+            while (ServiceClient.serviceVersion.also { serviceVersion = it } <= 0 && count++ < 100) {
+                Thread.sleep(100)
+            }
+
+            if (serviceVersion > 0) {
+                lifecycleScope.launch {
+                    loadEnabledIndicator(serviceVersion)
+                }
+            }
+        }
+    }
+
+    fun loadEnabledIndicator(serviceVersion: Int) {
         var color = when {
             serviceVersion == 0 -> getColor(R.color.invalid)
             else -> themeColor(android.R.attr.colorPrimary)
@@ -337,12 +336,7 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
 
                     true
                 }
-            } else {
-                moduleStatusIcon.setImageResource(R.drawable.sentiment_very_dissatisfied_24px)
-                moduleStatus.setText(R.string.home_xposed_not_activated)
-            }
 
-            if (serviceVersion != 0) {
                 if (serviceVersion < org.frknkrc44.hma_oss.common.BuildConfig.SERVICE_VERSION) {
                     serviceStatus.text =
                         getString(R.string.home_xposed_service_old)
@@ -354,6 +348,8 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
                 filterCount.text =
                     getString(R.string.home_xposed_filter_count, ServiceClient.filterCount)
             } else {
+                moduleStatusIcon.setImageResource(R.drawable.sentiment_very_dissatisfied_24px)
+                moduleStatus.setText(R.string.home_xposed_not_activated)
                 serviceStatus.setText(R.string.home_xposed_service_off)
                 filterCount.visibility = View.GONE
             }
