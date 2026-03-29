@@ -4,6 +4,7 @@ import android.os.Build
 import com.v7878.unsafe.ArtMethodUtils
 import com.v7878.unsafe.Reflection
 import com.v7878.unsafe.invoke.EmulatedStackFrame
+import com.v7878.unsafe.invoke.EmulatedStackFrame.RETURN_VALUE_IDX
 import com.v7878.unsafe.invoke.Transformers
 import com.v7878.vmtools.HookTransformer
 import com.v7878.vmtools.Hooks
@@ -105,7 +106,7 @@ class BulkHooker private constructor() {
             }
 
             if (value.throwable == null && Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                value.setResultWithoutReplace(frame.accessor().getValue(EmulatedStackFrame.RETURN_VALUE_IDX))
+                value.result = frame.accessor().getValue(RETURN_VALUE_IDX)
             }
 
             try {
@@ -206,7 +207,7 @@ class BulkHooker private constructor() {
                 element.memoryAddresses?.first!!
             )
         } else {
-            Transformers.invokeExactPlain(original, frame)
+            Transformers.invokeExactNoChecks(original, frame)
         }
     }
 

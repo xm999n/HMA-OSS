@@ -1,6 +1,7 @@
 package org.frknkrc44.hma_oss.zygote.hook
 
 import android.content.ComponentName
+import android.os.Binder
 import android.os.Build
 import android.provider.Settings
 import android.view.inputmethod.InputMethodInfo
@@ -13,7 +14,9 @@ import org.frknkrc44.hma_oss.zygote.service.HMAService
 import org.frknkrc44.hma_oss.zygote.service.HookParam
 import org.frknkrc44.hma_oss.zygote.util.Logcat.logD
 import org.frknkrc44.hma_oss.zygote.util.Logcat.logV
+import org.frknkrc44.hma_oss.zygote.util.Logcat.logW
 import org.frknkrc44.hma_oss.zygote.util.Utils4Zygote
+import org.frknkrc44.hma_oss.zygote.util.Utils4Zygote.callStaticMethod
 import org.frknkrc44.hma_oss.zygote.util.ZygoteConstants.IMM_IMPL_CLASS
 import org.frknkrc44.hma_oss.zygote.util.ZygoteConstants.IMM_SERVICE_CLASS
 import java.util.Collections
@@ -58,6 +61,7 @@ class ImmHook(private val service: HMAService) : IFrameworkHook {
         )
     }
 
+    @Suppress("UNCHECKED_CAST")
     override fun load() {
         // OEMs (especially Samsung and Xiaomi) messes up whole framework code,
         // so nothing left except messing up this code
@@ -66,10 +70,10 @@ class ImmHook(private val service: HMAService) : IFrameworkHook {
                 findAltMethod(
                     listOf(IMM_SERVICE_CLASS, IMM_IMPL_CLASS),
                     listOf("getCurrentInputMethodInfoAsUser"),
-                )?.let {
+                )?.let { method ->
                     hookBefore(
-                        it.declaringClass.name,
-                        it.name,
+                        method.declaringClass.name,
+                        method.name,
                     ) { param ->
                         val callingApps = Utils4Zygote.getCallingApps(service)
 
@@ -77,7 +81,13 @@ class ImmHook(private val service: HMAService) : IFrameworkHook {
                         if (caller != null) {
                             logD(TAG, "@${param.methodName} spoofed input method for $caller")
 
-                            param.result = getFakeInputMethodInfo(caller)
+                            val fakeIMInfo = getFakeInputMethodInfo(caller)
+                            val userHandle = param.getArgument(1) as Int
+                            if (Utils.getPackageUidCompat(service.pms, fakeIMInfo.packageName, 0L, userHandle) < 0) {
+                                warnNotInstalledKeyboard(param.methodName, fakeIMInfo.packageName)
+                            }
+
+                            param.result = fakeIMInfo
                             service.increaseSettingsFilterCount(caller)
                         }
                     }
@@ -87,12 +97,42 @@ class ImmHook(private val service: HMAService) : IFrameworkHook {
             findAltMethod(
                 listOf(IMM_SERVICE_CLASS),
                 listOf("getInputMethodList", "getInputMethodListInternal"),
-            )?.let {
-                hookBefore(
-                    it.declaringClass.name,
-                    it.name,
+            )?.let { method ->
+                hookAfter(
+                    method.declaringClass.name,
+                    method.name,
                 ) { param ->
-                    listHook(param)
+                    logD(TAG, "@${param.methodName}: hook init")
+
+                    val currentResult = param.result ?: return@hookAfter
+                    logD(TAG, "@${param.methodName}: Result: $currentResult Args: ${param.args.contentToString()}")
+
+                    val callingUid = if (param.args.count { it is Int } > 2) {
+                        param.args.lastOrNull { it is Int && it > 999 } as? Int ?: return@hookAfter
+                    } else {
+                        Binder.getCallingUid()
+                    }
+
+                    logD(TAG, "@${param.methodName}: Caller ID: $callingUid")
+
+                    val returnType = param.frame.type().returnType()
+                    if (returnType.simpleName == "InputMethodInfoSafeList") {
+                        val inList = callStaticMethod(
+                            currentResult.javaClass,
+                            "extractFrom",
+                            currentResult
+                        ) as List<InputMethodInfo>
+
+                        val newImmList = calculateReturnedInputMethodList(callingUid, inList)
+
+                        param.result = returnType.getDeclaredMethod(
+                            "create",
+                            List::class.java,
+                        ).apply { isAccessible = true }.invoke(null, newImmList)
+                    } else {
+                        param.result = calculateReturnedInputMethodList(
+                            callingUid, currentResult as List<InputMethodInfo>)
+                    }
                 }
             }
 
@@ -153,7 +193,13 @@ class ImmHook(private val service: HMAService) : IFrameworkHook {
         if (caller != null) {
             logD(TAG, "@${param.methodName} spoofed input method for $caller")
 
-            listOf(getFakeInputMethodInfo(caller)).let { list ->
+            val fakeIMInfo = getFakeInputMethodInfo(caller)
+            val userHandle = Binder.getCallingUserHandle()
+            if (Utils.getPackageUidCompat(service.pms, fakeIMInfo.packageName, 0L, userHandle.hashCode()) < 0) {
+                warnNotInstalledKeyboard(param.methodName, fakeIMInfo.packageName)
+            }
+
+            listOf(fakeIMInfo).let { list ->
                 val returnType = param.frame.type().returnType()
                 param.result = if (returnType.simpleName == "InputMethodInfoSafeList") {
                     returnType.getDeclaredMethod(
@@ -200,6 +246,35 @@ class ImmHook(private val service: HMAService) : IFrameworkHook {
 
             service.increaseSettingsFilterCount(caller)
         }
+    }
+
+    fun calculateReturnedInputMethodList(callingUid: Int, inList: List<InputMethodInfo>): List<InputMethodInfo> {
+        logD(TAG, "@getInputMethodList*calculator: $callingUid - Current: ${inList.map { it.component }}")
+
+        val caller = Utils4Zygote.getCallingApps(service, callingUid)
+            .firstOrNull { callerIsSpoofed(it) } ?: return inList
+
+        val calculatedList = inList.filter { imInfo ->
+            !service.shouldHide(caller, imInfo.packageName)
+        }
+
+        logD(TAG, "@getInputMethodList*calculator: $callingUid - Calculated: ${calculatedList.map { it.component }}")
+
+        val fakeIMInfo = getFakeInputMethodInfo(caller)
+
+        if (!calculatedList.any { it.packageName == fakeIMInfo.packageName }) {
+            warnNotInstalledKeyboard("getInputMethodList*calculator", fakeIMInfo.packageName)
+
+            return (calculatedList + fakeIMInfo).sortedWith { info1, info2 ->
+                info1.packageName.compareTo(info2.packageName)
+            }
+        }
+
+        return calculatedList
+    }
+
+    private fun warnNotInstalledKeyboard(methodName: String, packageName: String) {
+        logW(TAG, "@$methodName: Spoofing for a not installed keyboard, please install $packageName to reduce detections or spoof for another keyboard by using settings templates")
     }
 
     private fun callerIsSpoofed(caller: String) =

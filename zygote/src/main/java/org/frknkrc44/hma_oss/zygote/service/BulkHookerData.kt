@@ -16,11 +16,6 @@ class ReturnValue(initialValue: Any? = null) {
             replace = true
         }
 
-    fun setResultWithoutReplace(newValue: Any?) {
-        result = newValue
-        replace = false
-    }
-
     var throwable: Throwable? = null
 }
 

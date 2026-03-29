@@ -32,6 +32,9 @@ public class ZygoteEntry {
             SystemServerHook.init();
         } catch (Throwable th) {
             logE(TAG, "An exception occurred while SystemServerHook init", th);
+
+            // do not print "Done" if there is an issue
+            return;
         }
 
         logI(TAG, "Done", null);

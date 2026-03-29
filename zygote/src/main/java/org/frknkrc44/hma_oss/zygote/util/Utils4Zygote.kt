@@ -148,6 +148,14 @@ object Utils4Zygote {
         ).apply { isAccessible = true }.invoke(obj, *args)
     }
 
+    fun callStaticMethod(clazz: Class<*>, name: String, vararg args: Any): Any? {
+        return getDeclaredMethod(
+            clazz,
+            name,
+            *args.map { it.javaClass }.toTypedArray()
+        ).apply { isAccessible = true }.invoke(null, *args)
+    }
+
     fun findConstructor(className: String, paramCount: Int = -1): Constructor<*>? {
         val clazz = Class.forName(className, true, SystemServerHook.classLoader)
 
