@@ -362,26 +362,21 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
 
     private fun loadDialogs() {
         if (ConfigManager.enableInternet == Constants.ENABLE_INTERNET_UNKNOWN) {
-            loadEnableInternetDialogLocked()
+            loadEnableInternetDialog()
             return
         }
 
-        if (ConfigManager.enableInternet != Constants.ENABLE_INTERNET_ON ||
-                hmaApp.updateDialogSkipped || PrefManager.disableUpdate || isTestBuild) {
-            return
-        }
-
-        loadUpdateDialogLocked()
+        loadUpdateDialog()
     }
 
-    private fun loadEnableInternetDialogLocked() {
+    private fun loadEnableInternetDialog() {
         MaterialAlertDialogBuilder(requireContext())
             .setCancelable(false)
             .setTitle(R.string.settings_enable_internet)
             .setMessage(R.string.settings_enable_internet_summary)
             .setPositiveButton(R.string.yes) { _, _ ->
                 ConfigManager.enableInternet = Constants.ENABLE_INTERNET_ON
-                loadUpdateDialogLocked()
+                loadUpdateDialog()
             }
             .setNegativeButton(R.string.no) { _, _ ->
                 ConfigManager.enableInternet = Constants.ENABLE_INTERNET_OFF
@@ -389,7 +384,12 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
             .show()
     }
 
-    private fun loadUpdateDialogLocked() {
+    private fun loadUpdateDialog() {
+        if (ConfigManager.enableInternet != Constants.ENABLE_INTERNET_ON ||
+            hmaApp.updateDialogSkipped || PrefManager.disableUpdate || isTestBuild) {
+            return
+        }
+
         fetchLatestUpdate { updateInfo ->
             if (updateInfo.versionName != BuildConfig.VERSION_NAME) {
                 withContext(Dispatchers.Main) {
