@@ -83,7 +83,7 @@ class ImmHook(private val service: HMAService) : IFrameworkHook {
 
                             val fakeIMInfo = getFakeInputMethodInfo(caller)
                             val userHandle = param.getArgument(1) as Int
-                            if (Utils.getPackageUidCompat(service.pms, fakeIMInfo.packageName, 0L, userHandle) < 0) {
+                            if (!isIMExists(fakeIMInfo.packageName, userHandle)) {
                                 warnNotInstalledKeyboard(param.methodName, fakeIMInfo.packageName)
                             }
 
@@ -194,8 +194,7 @@ class ImmHook(private val service: HMAService) : IFrameworkHook {
             logD(TAG, "@${param.methodName} spoofed input method for $caller")
 
             val fakeIMInfo = getFakeInputMethodInfo(caller)
-            val userHandle = Binder.getCallingUserHandle()
-            if (Utils.getPackageUidCompat(service.pms, fakeIMInfo.packageName, 0L, userHandle.hashCode()) < 0) {
+            if (!isIMExists(fakeIMInfo.packageName)) {
                 warnNotInstalledKeyboard(param.methodName, fakeIMInfo.packageName)
             }
 
@@ -262,15 +261,22 @@ class ImmHook(private val service: HMAService) : IFrameworkHook {
 
         val fakeIMInfo = getFakeInputMethodInfo(caller)
 
-        if (!calculatedList.any { it.packageName == fakeIMInfo.packageName }) {
+        if (!isIMExists(fakeIMInfo.packageName)) {
             warnNotInstalledKeyboard("getInputMethodList*calculator", fakeIMInfo.packageName)
 
-            return (calculatedList + fakeIMInfo).sortedWith { info1, info2 ->
-                info1.packageName.compareTo(info2.packageName)
+            if (!calculatedList.any { it.packageName == fakeIMInfo.packageName }) {
+                return (calculatedList + fakeIMInfo).sortedWith { info1, info2 ->
+                    info1.packageName.compareTo(info2.packageName)
+                }
             }
         }
 
         return calculatedList
+    }
+
+    private fun isIMExists(packageName: String, inUserId: Int? = null): Boolean {
+        val userId = inUserId ?: Binder.getCallingUserHandle().hashCode()
+        return Utils.getPackageUidCompat(service.pms, packageName, 0L, userId) >= 0
     }
 
     private fun warnNotInstalledKeyboard(methodName: String, packageName: String) {
