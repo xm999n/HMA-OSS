@@ -12,7 +12,7 @@ class HMAServiceCache private constructor() {
     fun shouldHideFromUid(uid: Int, query: String?): Boolean? {
         if (query == null) return null
 
-        return uidHideCache.any { it.first == uid && it.third.contains(query) }
+        return uidHideCache.firstOrNull { it.first == uid && it.third.contains(query) } != null
     }
 
     fun putShouldHideUidCache(uid: Int, caller: String, query: String) {
