@@ -191,7 +191,7 @@ class ImmHook(private val service: HMAService) : IFrameworkHook {
 
         val caller = callingApps.firstOrNull { callerIsSpoofed(it) }
         if (caller != null) {
-            logD(TAG, "@${param.methodName} spoofed input method for $caller")
+            logD(TAG, "@${param.methodName}: spoofed input method for $caller")
 
             val fakeIMInfo = getFakeInputMethodInfo(caller)
             if (!isIMExists(fakeIMInfo.packageName)) {
@@ -217,7 +217,7 @@ class ImmHook(private val service: HMAService) : IFrameworkHook {
 
         val caller = callingApps.firstOrNull { callerIsSpoofed(it) }
         if (caller != null) {
-            logD(TAG, "@${param.methodName} spoofed input method subtype for ${callingApps.contentToString()}")
+            logD(TAG, "@${param.methodName}: spoofed input method subtype for ${callingApps.contentToString()}")
 
             // TODO: Find a method to get exact value for spoofed input method
             param.result = null
@@ -230,7 +230,7 @@ class ImmHook(private val service: HMAService) : IFrameworkHook {
 
         val caller = callingApps.firstOrNull { callerIsSpoofed(it) }
         if (caller != null) {
-            logD(TAG, "@${param.methodName} spoofed input method subtype for ${callingApps.contentToString()}")
+            logD(TAG, "@${param.methodName}: spoofed input method subtype for ${callingApps.contentToString()}")
 
             // TODO: Find a method to get exact list for spoofed input method
             Collections.emptyList<InputMethodSubtype>().let { list ->
@@ -248,16 +248,18 @@ class ImmHook(private val service: HMAService) : IFrameworkHook {
     }
 
     fun calculateReturnedInputMethodList(callingUid: Int, inList: List<InputMethodInfo>): List<InputMethodInfo> {
-        logD(TAG, "@getInputMethodList*calculator: $callingUid - Current: ${inList.map { it.component }}")
+        logV(TAG, "@getInputMethodList*calculator: $callingUid - Current: ${inList.map { it.component }}")
 
         val caller = Utils4Zygote.getCallingApps(service, callingUid)
             .firstOrNull { callerIsSpoofed(it) } ?: return inList
+
+        logD(TAG, "@getInputMethodList: spoofed input method for $caller")
 
         val calculatedList = inList.filter { imInfo ->
             !service.shouldHide(caller, imInfo.packageName)
         }
 
-        logD(TAG, "@getInputMethodList*calculator: $callingUid - Calculated: ${calculatedList.map { it.component }}")
+        logV(TAG, "@getInputMethodList*calculator: $callingUid - Calculated: ${calculatedList.map { it.component }}")
 
         val fakeIMInfo = getFakeInputMethodInfo(caller)
 
