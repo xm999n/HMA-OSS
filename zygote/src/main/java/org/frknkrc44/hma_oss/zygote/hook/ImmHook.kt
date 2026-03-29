@@ -285,7 +285,7 @@ class ImmHook(private val service: HMAService) : IFrameworkHook {
     }
 
     private fun warnNotInstalledKeyboard(methodName: String, packageName: String) {
-        logW(TAG, "@$methodName: Spoofing for a not installed keyboard, please install $packageName or spoof for another keyboard by using settings templates to reduce detections")
+        logW(TAG, "@$methodName: (Probably) spoofing for a not installed keyboard, please install $packageName or spoof for another keyboard by using settings templates to reduce detections")
     }
 
     private fun callerIsSpoofed(caller: String) =
