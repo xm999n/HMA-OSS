@@ -264,7 +264,7 @@ class ImmHook(private val service: HMAService) : IFrameworkHook {
 
         val fakeIMInfo = getFakeInputMethodInfo(caller)
 
-        if (!isIMExists(fakeIMInfo.packageName)) {
+        if (!(isIMExists(fakeIMInfo.packageName) && calculatedList.any { it.packageName == fakeIMInfo.packageName })) {
             warnNotInstalledKeyboard("getInputMethodList*calculator", fakeIMInfo.packageName)
 
             if (!calculatedList.any { it.packageName == fakeIMInfo.packageName }) {
@@ -280,7 +280,7 @@ class ImmHook(private val service: HMAService) : IFrameworkHook {
     private fun isIMExists(packageName: String, inUserId: Int? = null): Boolean {
         val userId = inUserId ?: Binder.getCallingUserHandle().hashCode()
         return Utils.binderLocalScope {
-            Utils.getPackageUidCompat(service.pms, packageName, 0L, userId) >= 0
+            Utils.getPackageUidCompat(service.pms, packageName, PackageManager.MATCH_ALL.toLong(), userId) >= 0
         }
     }
 
