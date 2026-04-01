@@ -3,7 +3,6 @@ package icu.nullptr.hidemyapplist.ui.util
 import android.content.ComponentName
 import android.content.pm.ActivityInfo
 import android.content.res.Resources
-import androidx.fragment.app.Fragment
 import kotlinx.coroutines.flow.MutableSharedFlow
 import org.frknkrc44.hma_oss.BuildConfig
 import org.frknkrc44.hma_oss.R

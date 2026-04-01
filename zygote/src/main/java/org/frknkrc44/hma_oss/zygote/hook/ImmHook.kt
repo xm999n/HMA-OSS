@@ -145,7 +145,29 @@ class ImmHook(private val service: HMAService) : IFrameworkHook {
                     it.declaringClass.name,
                     it.name,
                 ) { param ->
-                    listHook(param)
+                    val callingApps = Utils4Zygote.getCallingApps(service)
+
+                    val caller = callingApps.firstOrNull { callerIsSpoofed(it) }
+                    if (caller != null) {
+                        logD(TAG, "@${param.methodName}: spoofed input method for $caller")
+
+                        val fakeIMInfo = getFakeInputMethodInfo(caller)
+                        if (!isIMExists(fakeIMInfo.packageName)) {
+                            warnNotInstalledKeyboard(param.methodName, fakeIMInfo.packageName)
+                        }
+
+                        listOf(fakeIMInfo).let { list ->
+                            val returnType = param.frame.type().returnType()
+                            param.result = if (returnType.simpleName == "InputMethodInfoSafeList") {
+                                returnType.getDeclaredMethod(
+                                    "create",
+                                    List::class.java,
+                                ).apply { isAccessible = true }.invoke(null, list)
+                            } else { list }
+                        }
+
+                        service.increaseSettingsFilterCount(caller)
+                    }
                 }
             }
 
@@ -184,32 +206,6 @@ class ImmHook(private val service: HMAService) : IFrameworkHook {
                     subtypeListHook(param)
                 }
             }
-        }
-    }
-
-    private fun listHook(param: HookParam) {
-        val callingApps = Utils4Zygote.getCallingApps(service)
-
-        val caller = callingApps.firstOrNull { callerIsSpoofed(it) }
-        if (caller != null) {
-            logD(TAG, "@${param.methodName}: spoofed input method for $caller")
-
-            val fakeIMInfo = getFakeInputMethodInfo(caller)
-            if (!isIMExists(fakeIMInfo.packageName)) {
-                warnNotInstalledKeyboard(param.methodName, fakeIMInfo.packageName)
-            }
-
-            listOf(fakeIMInfo).let { list ->
-                val returnType = param.frame.type().returnType()
-                param.result = if (returnType.simpleName == "InputMethodInfoSafeList") {
-                    returnType.getDeclaredMethod(
-                        "create",
-                        List::class.java,
-                    ).apply { isAccessible = true }.invoke(null, list)
-                } else { list }
-            }
-
-            service.increaseSettingsFilterCount(caller)
         }
     }
 
