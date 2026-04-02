@@ -53,8 +53,8 @@ class PmsHookTarget29(service: HMAService) : PmsHookTargetBase(service) {
             ) { param ->
                 applyPackageHiding(
                     param.methodName,
-                    { param.getArgument(1) as Int? },
-                    { param.getArgument(3) as String? },
+                    { param.getArgument(3) as Int? },
+                    { param.getArgument(1) as String? },
                     { getCallingApps(service, it) },
                     { param.result = null },
                 )
