@@ -21,6 +21,7 @@ import java.lang.reflect.Method
 class BulkHooker private constructor() {
     companion object {
         val instance: BulkHooker by lazy { BulkHooker() }
+        const val PARAMETER_COUNT_UNKNOWN = -1
     }
 
     internal val hooks: MutableMap<String, MutableList<HookElement>> = HashMap()
@@ -55,7 +56,7 @@ class BulkHooker private constructor() {
         clazz: String,
         methodName: String,
         hookOnce: Boolean = true,
-        paramCount: Int = -1,
+        paramCount: Int = PARAMETER_COUNT_UNKNOWN,
         hook: (param: HookParam) -> Unit,
     ) {
         addHook(clazz, methodName, hookOnce, paramCount) { original, frame ->
@@ -92,7 +93,7 @@ class BulkHooker private constructor() {
         clazz: String,
         methodName: String,
         hookOnce: Boolean = true,
-        paramCount: Int = -1,
+        paramCount: Int = PARAMETER_COUNT_UNKNOWN,
         hook: (param: HookParam) -> Unit,
     ) {
         addHook(clazz, methodName, hookOnce, paramCount) { original, frame ->
@@ -141,7 +142,7 @@ class BulkHooker private constructor() {
         fun applyForClass(clazz: Class<*>?) {
             val executables = Reflection.getHiddenExecutables(clazz).filter { executable ->
                 element.methodName == executable.name &&
-                    (element.paramCount in listOf(-1, executable.parameterCount))
+                    (element.paramCount in listOf(PARAMETER_COUNT_UNKNOWN, executable.parameterCount))
             }.sortedWith { v1, v2 ->
                 v1.parameterCount.compareTo(v2.parameterCount)
             }
@@ -239,13 +240,13 @@ class BulkHooker private constructor() {
             fun findMethods(clazz: Class<*>): List<Executable> {
                 return Reflection.getHiddenExecutables(clazz).filter { executable ->
                     executable.name in methodNames &&
-                            (paramCount in listOf(-1, executable.parameterCount))
+                            (paramCount in listOf(PARAMETER_COUNT_UNKNOWN, executable.parameterCount))
                 }.sortedWith { v1, v2 ->
                     v1.parameterCount.compareTo(v2.parameterCount)
                 }
             }
 
-            var methods: List<Executable> = listOf()
+            var methods = listOf<Executable>()
 
             while (
                 methods.isEmpty() &&
