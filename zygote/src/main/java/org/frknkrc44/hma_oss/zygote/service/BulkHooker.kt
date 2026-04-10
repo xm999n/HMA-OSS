@@ -46,7 +46,11 @@ class BulkHooker private constructor() {
         )
 
         if (applyHook(clazz, element)) {
-            hooks.computeIfAbsent(clazz) { _ -> mutableListOf() }.add(element)
+            if (clazz !in hooks) {
+                hooks[clazz] = mutableListOf()
+            }
+
+            hooks[clazz]!!.add(element)
         } else {
             logI(ZygoteEntry.TAG, "Invalid hook removed: $clazz -> $methodName($paramCount)")
         }
@@ -149,14 +153,14 @@ class BulkHooker private constructor() {
 
             for (executable in executables) {
                 if (!element.hookFinished) {
-                    logD(ZygoteEntry.TAG, "Hooked: $executable")
+                    // logD(ZygoteEntry.TAG, "Hooked: $executable")
 
                     val memoryAddresses = Hooks.hook(
                         executable, Hooks.EntryPointType.DIRECT,
                         element.impl, Hooks.EntryPointType.DIRECT
                     )
 
-                    logV(ZygoteEntry.TAG, "Memory address map: $memoryAddresses")
+                    // logV(ZygoteEntry.TAG, "Memory address map: $memoryAddresses")
 
                     if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
                         element.memoryAddresses = memoryAddresses
