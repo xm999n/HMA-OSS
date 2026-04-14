@@ -49,7 +49,7 @@ class AccessibilityHook(private val service: HMAService) : IFrameworkHook {
 
                 val caller = callingApps.firstOrNull { callerIsSpoofed(it) }
                 if (caller != null) {
-                    logD(TAG, { "@${param.methodName} returning empty list for ${callingApps.contentToString()}" })
+                    logD(TAG) { "@${param.methodName} returning empty list for ${callingApps.contentToString()}" }
 
                     val returnedList = java.util.ArrayList<AccessibilityServiceInfo>()
                     param.result = if ("Parcel" in param.returnType.simpleName) {
@@ -80,7 +80,7 @@ class AccessibilityHook(private val service: HMAService) : IFrameworkHook {
         callingApps: Array<String>,
         inList: List<AccessibilityServiceInfo>,
     ): List<AccessibilityServiceInfo> {
-        logV(TAG, { "@getInstalledAccessibilityServiceList*calculator: $callingApps - Current: $inList" })
+        logV(TAG) { "@getInstalledAccessibilityServiceList*calculator: $callingApps - Current: $inList" }
 
         val caller = callingApps.firstOrNull { callerIsSpoofed(it) } ?: return inList
 
@@ -88,7 +88,7 @@ class AccessibilityHook(private val service: HMAService) : IFrameworkHook {
             !service.shouldHide(caller, Utils.getPackageNameFromResolveInfo(asInfo.resolveInfo))
         }
 
-        logV(TAG, { "@getInstalledAccessibilityServiceList*calculator: $caller - Calculated: $calculatedList" })
+        logV(TAG) { "@getInstalledAccessibilityServiceList*calculator: $caller - Calculated: $calculatedList" }
 
         return calculatedList
     }

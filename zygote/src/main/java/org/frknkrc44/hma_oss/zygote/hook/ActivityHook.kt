@@ -33,7 +33,7 @@ class ActivityHook(private val service: HMAService) : IFrameworkHook {
     }
 
     override fun load() {
-        logI(TAG, { "Load hook" })
+        logI(TAG) { "Load hook" }
 
         BulkHooker.instance.apply {
             hookBefore(
@@ -46,10 +46,7 @@ class ActivityHook(private val service: HMAService) : IFrameworkHook {
                 val targetApp = intent?.component?.packageName
 
                 if (service.shouldHideActivityLaunch(caller, targetApp)) {
-                    logD(
-                        TAG,
-                        { "@executeRequest: insecure query from $caller, target: ${intent?.component}" }
-                    )
+                    logD(TAG) { "@executeRequest: insecure query from $caller, target: ${intent?.component}" }
                     param.result = fakeReturnCode
                     service.increaseALFilterCount(caller)
                 }
@@ -63,7 +60,7 @@ class ActivityHook(private val service: HMAService) : IFrameworkHook {
                 },
                 "checkStartAnyActivityPermission",
             ) { param ->
-                logV(TAG, { "${param.methodName}: ${param.args.contentToString()}" })
+                logV(TAG) { "${param.methodName}: ${param.args.contentToString()}" }
 
                 // just an empty hook that does nothing
             }
@@ -87,16 +84,16 @@ class ActivityHook(private val service: HMAService) : IFrameworkHook {
                     val callingApps = Utils4Zygote.getCallingApps(service, callingUid)
                     val caller = callingApps.firstOrNull { service.isHookEnabled(it) }
                     if (caller != null) {
-                        logV(TAG, { "@${param.methodName}: $caller requested a resolve info" })
+                        logV(TAG) { "@${param.methodName}: $caller requested a resolve info" }
 
                         val filteredList = list.filter { resolveInfo ->
                             val targetApp = Utils.getPackageNameFromResolveInfo(resolveInfo)
 
-                            logV(TAG, { "@${param.methodName}: Checking $targetApp for $caller" })
+                            logV(TAG) { "@${param.methodName}: Checking $targetApp for $caller" }
 
                             (!service.shouldHideActivityLaunch(caller, targetApp)).apply {
                                 if (!this) {
-                                    logD(TAG, { "@${param.methodName}: Filtered $targetApp from $caller" })
+                                    logD(TAG) { "@${param.methodName}: Filtered $targetApp from $caller" }
                                 }
                             }
                         }

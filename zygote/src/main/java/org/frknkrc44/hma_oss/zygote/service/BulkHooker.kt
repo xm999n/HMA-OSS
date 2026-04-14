@@ -34,7 +34,7 @@ class BulkHooker private constructor() {
         }
 
         if (inDisabledHooks == true) {
-            logI(ZygoteEntry.TAG, { "Disabled hook: $clazz -> $methodName($paramCount)" })
+            logI(ZygoteEntry.TAG) { "Disabled hook: $clazz -> $methodName($paramCount)" }
             return
         }
 
@@ -52,7 +52,7 @@ class BulkHooker private constructor() {
 
             hooks[clazz]!!.add(element)
         } else {
-            logI(ZygoteEntry.TAG, { "Invalid hook removed: $clazz -> $methodName($paramCount)" })
+            logI(ZygoteEntry.TAG) { "Invalid hook removed: $clazz -> $methodName($paramCount)" }
         }
     }
 
@@ -69,14 +69,14 @@ class BulkHooker private constructor() {
             try {
                 hook(HookParam(clazz, original, frame, methodName, value))
             } catch (it: Throwable) {
-                logE(ZygoteEntry.TAG, { it.message ?: "Unknown error on hook" }, it)
+                logE(ZygoteEntry.TAG, it) { it.message ?: "Unknown error on hook" }
             }
 
             if (!value.replace) {
                 try {
                     invokeExactCompat(clazz, methodName, original, frame, value)
                 } catch (it: Throwable) {
-                    logD(ZygoteEntry.TAG, { it.message ?: "Unknown error on original function" }, it)
+                    logD(ZygoteEntry.TAG, it) { it.message ?: "Unknown error on original function" }
                     value.throwable = it
                 }
             }
@@ -106,7 +106,7 @@ class BulkHooker private constructor() {
             try {
                 invokeExactCompat(clazz, methodName, original, frame, value)
             } catch (it: Throwable) {
-                logD(ZygoteEntry.TAG, { it.message ?: "Unknown error on original function" }, it)
+                logD(ZygoteEntry.TAG, it) { it.message ?: "Unknown error on original function" }
                 value.throwable = it
             }
 
@@ -117,7 +117,7 @@ class BulkHooker private constructor() {
             try {
                 hook(HookParam(clazz, original, frame, methodName, value))
             } catch (it: Throwable) {
-                logE(ZygoteEntry.TAG, { it.message ?: "Unknown error on hook" }, it)
+                logE(ZygoteEntry.TAG, it) { it.message ?: "Unknown error on hook" }
             }
 
             value.throwable?.let {
@@ -139,7 +139,7 @@ class BulkHooker private constructor() {
         try {
             curClazz = Class.forName(clazz, true, loader)
         } catch (ex: ClassNotFoundException) {
-            logE(ZygoteEntry.TAG, { "Class $clazz not found" }, ex)
+            logE(ZygoteEntry.TAG, ex) { "Class $clazz not found" }
             return false
         }
 
@@ -153,14 +153,14 @@ class BulkHooker private constructor() {
 
             for (executable in executables) {
                 if (!element.hookFinished) {
-                    logD(ZygoteEntry.TAG, { "Hooked: $executable" })
+                    logD(ZygoteEntry.TAG) { "Hooked: $executable" }
 
                     val memoryAddresses = Hooks.hook(
                         executable, Hooks.EntryPointType.DIRECT,
                         element.impl, Hooks.EntryPointType.DIRECT
                     )
 
-                    logV(ZygoteEntry.TAG, { "Memory address map: $memoryAddresses" })
+                    logV(ZygoteEntry.TAG) { "Memory address map: $memoryAddresses" }
 
                     if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
                         element.memoryAddresses = memoryAddresses
@@ -237,7 +237,7 @@ class BulkHooker private constructor() {
             try {
                 curClazz = Class.forName(clazz, true, loader)
             } catch (ex: ClassNotFoundException) {
-                logE(ZygoteEntry.TAG, { "Class $clazz not found" }, ex)
+                logE(ZygoteEntry.TAG, ex) { "Class $clazz not found" }
                 return null
             }
 
@@ -264,7 +264,7 @@ class BulkHooker private constructor() {
             return methods.firstOrNull()
         }
 
-        logI(ZygoteEntry.TAG, { "Invalid hook detected: $clazzNames -> $methodNames($paramCount)" })
+        logI(ZygoteEntry.TAG) { "Invalid hook detected: $clazzNames -> $methodNames($paramCount)" }
 
         return null
     }

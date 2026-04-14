@@ -28,7 +28,7 @@ object Logcat {
         if (!endsWith('\n')) append('\n')
     }
 
-    fun logWithLevel(level: Int, tag: String, msg: () -> String, cause: Throwable? = null) {
+    fun logWithLevel(level: Int, tag: String, cause: Throwable? = null, msg: () -> String) {
         if (level != Log.ERROR && HMAService.instance?.config?.errorOnlyLog == true) return
         if (level <= Log.DEBUG && HMAService.instance?.config?.detailLog == false) return
         if (level == Log.VERBOSE && !BuildConfig.DEBUG) return
@@ -53,19 +53,19 @@ object Logcat {
         Log.i("HMA-OSS", msg)
     }
 
-    fun logV(tag: String, msg: () -> String, cause: Throwable? = null) = logWithLevel(Log.VERBOSE, tag, msg, cause)
+    fun logV(tag: String, cause: Throwable? = null, msg: () -> String) = logWithLevel(Log.VERBOSE, tag, cause, msg)
 
-    fun logD(tag: String, msg: () -> String, cause: Throwable? = null) = logWithLevel(Log.DEBUG, tag, msg, cause)
+    fun logD(tag: String, cause: Throwable? = null, msg: () -> String) = logWithLevel(Log.DEBUG, tag, cause, msg)
 
-    fun logI(tag: String, msg: () -> String, cause: Throwable? = null) = logWithLevel(Log.INFO, tag, msg, cause)
+    fun logI(tag: String, cause: Throwable? = null, msg: () -> String) = logWithLevel(Log.INFO, tag, cause, msg)
 
-    fun logW(tag: String, msg: () -> String, cause: Throwable? = null) = logWithLevel(Log.WARN, tag, msg, cause)
+    fun logW(tag: String, cause: Throwable? = null, msg: () -> String) = logWithLevel(Log.WARN, tag, cause, msg)
 
-    fun logE(tag: String, msg: () -> String, cause: Throwable? = null) = logWithLevel(Log.ERROR, tag, msg, cause)
-
-    @JvmStatic
-    fun logILegacy(tag: String, msg: String, cause: Throwable? = null) = logI(tag, { msg }, cause)
+    fun logE(tag: String, cause: Throwable? = null, msg: () -> String) = logWithLevel(Log.ERROR, tag, cause, msg)
 
     @JvmStatic
-    fun logELegacy(tag: String, msg: String, cause: Throwable? = null) = logE(tag, { msg }, cause)
+    fun logILegacy(tag: String, msg: String, cause: Throwable?) = logI(tag, cause) { msg }
+
+    @JvmStatic
+    fun logELegacy(tag: String, msg: String, cause: Throwable?) = logE(tag, cause) { msg }
 }

@@ -25,7 +25,7 @@ object SystemServerHook {
 
     @Throws(Throwable::class)
     fun onSystemServer(loader: ClassLoader?) {
-        logV(TAG, { "Class loader found: $loader" })
+        logV(TAG) { "Class loader found: $loader" }
 
         classLoader = loader
 
@@ -35,13 +35,13 @@ object SystemServerHook {
             thread {
                 val pms = Utils4Zygote.waitForService("package") as IPackageManager
                 val pmn = Utils4Zygote.waitForService("package_native")
-                logD(TAG, { "Got pms: $pms, $pmn" })
+                logD(TAG) { "Got pms: $pms, $pmn" }
 
                 runCatching {
                     UserService.register(pms, pmn)
-                    logI(TAG, { "User service started" })
+                    logI(TAG) { "User service started" }
                 }.onFailure {
-                    logE(TAG, { "System service crashed" }, it)
+                    logE(TAG, it) { "System service crashed" }
                 }
             }
         }
@@ -69,7 +69,7 @@ object SystemServerHook {
             try {
                 checkSystemServer(frame)
             } catch (th: Throwable) {
-                logE(TAG, { "An exception occurred while checkSystemServer" }, th)
+                logE(TAG, th) { "An exception occurred while checkSystemServer" }
             }
             Transformers.invokeExact(original, frame)
         }, Hooks.EntryPointType.DIRECT)

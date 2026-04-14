@@ -43,18 +43,18 @@ class ContentProviderHook(private val service: HMAService): IFrameworkHook {
                 val segments = uri.pathSegments
                 if (segments.isEmpty()) return@hookAfter
 
-                logD(TAG, { "@spoofSettings QUERY in ${callingApps.contentToString()}: $uri, ${projection?.contentToString()}, $args" })
+                logD(TAG) { "@spoofSettings QUERY in ${callingApps.contentToString()}: $uri, ${projection?.contentToString()}, $args" }
 
                 val database = segments[0]
 
                 if (segments.size >= 2) {
                     val name = segments[1]
 
-                    logD(TAG, { "@spoofSettings QUERY received caller: $caller, database: $database, name: $name" })
+                    logD(TAG) { "@spoofSettings QUERY received caller: $caller, database: $database, name: $name" }
 
                     val replacement = service.getSpoofedSetting(caller, name, database)
                     if (replacement != null) {
-                        logD(TAG, { "@spoofSettings QUERY $name in $database replaced for $caller" })
+                        logD(TAG) { "@spoofSettings QUERY $name in $database replaced for $caller" }
                         param.result = MatrixCursor(arrayOf("name", "value"), 1).apply {
                             addRow(arrayOf(replacement.name, replacement.value))
                         }
@@ -62,7 +62,7 @@ class ContentProviderHook(private val service: HMAService): IFrameworkHook {
                         service.increaseSettingsFilterCount(caller)
                     }
                 } else {
-                    logD(TAG, { "@spoofSettings LIST_QUERY received caller: $caller, database: $database" })
+                    logD(TAG) { "@spoofSettings LIST_QUERY received caller: $caller, database: $database" }
 
                     val result = param.result as? Cursor? ?: return@hookAfter
 
@@ -72,13 +72,13 @@ class ContentProviderHook(private val service: HMAService): IFrameworkHook {
                         }
                     }
 
-                    logD(TAG, { "@spoofSetting LIST_QUERY columns: ${columns.keys}" })
+                    logD(TAG) { "@spoofSetting LIST_QUERY columns: ${columns.keys}" }
 
                     val keyColumn = columns["name"]
                     val valueColumn = columns["value"]
 
                     if (keyColumn == null || valueColumn == null) {
-                        logD(TAG, { "@spoofSettings LIST_QUERY invalid query: $caller ($keyColumn, $valueColumn)" })
+                        logD(TAG) { "@spoofSettings LIST_QUERY invalid query: $caller ($keyColumn, $valueColumn)" }
                         return@hookAfter
                     }
 
@@ -88,7 +88,7 @@ class ContentProviderHook(private val service: HMAService): IFrameworkHook {
 
                         val replacement = service.getSpoofedSetting(caller, name, database)
                         val value = if (replacement != null) {
-                            logD(TAG, { "@spoofSettings QUERY $name in $database replaced for $caller" })
+                            logD(TAG) { "@spoofSettings QUERY $name in $database replaced for $caller" }
 
                             service.increaseSettingsFilterCount(caller)
 
@@ -135,14 +135,14 @@ class ContentProviderHook(private val service: HMAService): IFrameworkHook {
                 val name = param.args[nameIdx] as String?
                 val method = param.args[nameIdx - 1] as String?
 
-                logD(TAG, { "@spoofSettings CALL received caller: ${callingApps.contentToString()}, method: $method, name: $name" })
+                logD(TAG) { "@spoofSettings CALL received caller: ${callingApps.contentToString()}, method: $method, name: $name" }
 
                 when (method) {
                     "GET_global", "GET_secure", "GET_system" -> {
                         val database = method.substring(method.indexOf('_') + 1)
                         val replacement = service.getSpoofedSetting(caller, name, database)
                         if (replacement != null) {
-                            logD(TAG, { "@spoofSettings CALL $name in $database replaced for $caller" })
+                            logD(TAG) { "@spoofSettings CALL $name in $database replaced for $caller" }
                             param.result = Bundle().apply {
                                 putString(Settings.NameValueTable.VALUE, replacement.value)
                                 putInt("_generation_index", -1)

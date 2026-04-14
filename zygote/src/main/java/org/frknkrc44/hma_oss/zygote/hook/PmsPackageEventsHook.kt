@@ -12,7 +12,7 @@ class PmsPackageEventsHook(private val service: HMAService) : IFrameworkHook {
     override val TAG = "PmsPackageEventsHook"
 
     override fun load() {
-        logI(TAG, { "Load hook" })
+        logI(TAG) { "Load hook" }
 
         BulkHooker.instance.apply {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {

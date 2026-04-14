@@ -86,7 +86,7 @@ object Utils4Zygote {
                 String::class.java,
             ).invoke(null, name) as IBinder?
         } catch (e: Throwable) {
-            logE(TAG, { "An error occurred on waitForService" }, e)
+            logE(TAG, e) { "An error occurred on waitForService" }
         }
 
         var service: IBinder? = null
