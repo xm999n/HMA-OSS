@@ -116,7 +116,7 @@ class ImmHook(private val service: HMAService) : IFrameworkHook {
 
                     logD(TAG, { "@${param.methodName}: Caller ID: $callingUid" })
 
-                    val returnType = param.frame.type().returnType()
+                    val returnType = param.returnType
                     if (returnType.simpleName == "InputMethodInfoSafeList") {
                         val inList = callStaticMethod(
                             currentResult.javaClass,
@@ -157,7 +157,7 @@ class ImmHook(private val service: HMAService) : IFrameworkHook {
                         }
 
                         listOf(fakeIMInfo).let { list ->
-                            val returnType = param.frame.type().returnType()
+                            val returnType = param.returnType
                             param.result = if (returnType.simpleName == "InputMethodInfoSafeList") {
                                 returnType.getDeclaredMethod(
                                     "create",
@@ -231,7 +231,7 @@ class ImmHook(private val service: HMAService) : IFrameworkHook {
 
             // TODO: Find a method to get exact list for spoofed input method
             Collections.emptyList<InputMethodSubtype>().let { list ->
-                val returnType = param.frame.type().returnType()
+                val returnType = param.returnType
                 param.result = if (returnType.simpleName == "InputMethodSubtypeSafeList") {
                     returnType.getDeclaredMethod(
                         "create",

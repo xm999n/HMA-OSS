@@ -25,15 +25,15 @@ class AccessibilityHook(private val service: HMAService) : IFrameworkHook {
                 if (callingApps.isEmpty()) return@hookAfter
 
                 val currentResult = param.result ?: return@hookAfter
-                val isParcel = "Parcel" in  param.frame.type().returnType().simpleName
-                val inList = if (isParcel) {
+                val returnsParcel = "Parcel" in  param.returnType.simpleName
+                val inList = if (returnsParcel) {
                     (currentResult as ParceledListSlice<AccessibilityServiceInfo>).list
                 } else {
                     currentResult as List<AccessibilityServiceInfo>
                 }
 
                 val calculatedList = calculateReturnedAccessibilityList(callingApps, inList)
-                param.result = if (isParcel) {
+                param.result = if (returnsParcel) {
                     ParceledListSlice(calculatedList)
                 } else {
                     calculatedList
@@ -52,9 +52,7 @@ class AccessibilityHook(private val service: HMAService) : IFrameworkHook {
                     logD(TAG, { "@${param.methodName} returning empty list for ${callingApps.contentToString()}" })
 
                     val returnedList = java.util.ArrayList<AccessibilityServiceInfo>()
-
-                    val returnParcel = "Parcel" in param.frame.type().returnType().simpleName
-                    param.result = if (returnParcel) {
+                    param.result = if ("Parcel" in param.returnType.simpleName) {
                         ParceledListSlice(returnedList)
                     } else {
                         returnedList

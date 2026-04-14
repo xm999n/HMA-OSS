@@ -1,5 +1,6 @@
 package org.frknkrc44.hma_oss.zygote.service
 
+import android.util.Pair
 import com.v7878.unsafe.invoke.EmulatedStackFrame
 import com.v7878.vmtools.HookTransformer
 import org.frknkrc44.hma_oss.zygote.util.Utils4Zygote
@@ -31,6 +32,11 @@ data class HookParam(
         set(newValue) { returnValue.result = newValue }
 
     /**
+     * @return Class of the return type
+     */
+    val returnType: Class<*> get() = frame.type().returnType()
+
+    /**
      * Returns the first argument
      */
     val thisObject by lazy { Utils4Zygote.getArgument(frame, 0) }
@@ -55,7 +61,7 @@ data class HookElement(
     val methodName: String,
     val hookOnce: Boolean,
     var method: Executable? = null,
-    var memoryAddresses: android.util.Pair<Long, Long>? = null,
+    var memoryAddresses: Pair<Long, Long>? = null,
     var hookFinished: Boolean = false,
     val paramCount: Int = -1,
     var applyCount: Int = 0,
