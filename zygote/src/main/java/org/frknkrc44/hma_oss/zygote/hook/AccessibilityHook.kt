@@ -2,12 +2,12 @@ package org.frknkrc44.hma_oss.zygote.hook
 
 import android.accessibilityservice.AccessibilityServiceInfo
 import android.content.pm.ParceledListSlice
+import icu.nullptr.hidemyapplist.common.Utils
 import icu.nullptr.hidemyapplist.common.settings_presets.AccessibilityPreset
 import org.frknkrc44.hma_oss.zygote.service.BulkHooker
 import org.frknkrc44.hma_oss.zygote.service.HMAService
-import org.frknkrc44.hma_oss.zygote.service.HookParam
 import org.frknkrc44.hma_oss.zygote.util.Logcat.logD
-import org.frknkrc44.hma_oss.zygote.util.Logcat.logE
+import org.frknkrc44.hma_oss.zygote.util.Logcat.logV
 import org.frknkrc44.hma_oss.zygote.util.Utils4Zygote
 import org.frknkrc44.hma_oss.zygote.util.ZygoteConstants.ACCESSIBILITY_SERVICE_CLASS
 
@@ -16,15 +16,51 @@ class AccessibilityHook(private val service: HMAService) : IFrameworkHook {
 
     override fun load() {
         BulkHooker.instance.apply {
-            hookBefore(
+            @Suppress("UNCHECKED_CAST")
+            hookAfter(
                 ACCESSIBILITY_SERVICE_CLASS,
                 "getInstalledAccessibilityServiceList",
-            ) { param -> hookedMethod(param) }
+            ) { param ->
+                val callingApps = Utils4Zygote.getCallingApps(service)
+                if (callingApps.isEmpty()) return@hookAfter
+
+                val currentResult = param.result ?: return@hookAfter
+                val isParcel = "Parcel" in  param.frame.type().returnType().simpleName
+                val inList = if (isParcel) {
+                    (currentResult as ParceledListSlice<AccessibilityServiceInfo>).list
+                } else {
+                    currentResult as List<AccessibilityServiceInfo>
+                }
+
+                val calculatedList = calculateReturnedAccessibilityList(callingApps, inList)
+                param.result = if (isParcel) {
+                    ParceledListSlice(calculatedList)
+                } else {
+                    calculatedList
+                }
+            }
 
             hookBefore(
                 ACCESSIBILITY_SERVICE_CLASS,
                 "getEnabledAccessibilityServiceList",
-            ) { param -> hookedMethod(param) }
+            ) { param ->
+                val callingApps = Utils4Zygote.getCallingApps(service)
+                if (callingApps.isEmpty()) return@hookBefore
+
+                val caller = callingApps.firstOrNull { callerIsSpoofed(it) }
+                if (caller != null) {
+                    logD(TAG, { "@${param.methodName} returning empty list for ${callingApps.contentToString()}" })
+
+                    val returnedList = java.util.ArrayList<AccessibilityServiceInfo>()
+
+                    val returnParcel = "Parcel" in param.frame.type().returnType().simpleName
+                    param.result = if (returnParcel) {
+                        ParceledListSlice(returnedList)
+                    } else {
+                        returnedList
+                    }
+                }
+            }
 
             hookBefore(
                 ACCESSIBILITY_SERVICE_CLASS,
@@ -42,31 +78,23 @@ class AccessibilityHook(private val service: HMAService) : IFrameworkHook {
         }
     }
 
+    private fun calculateReturnedAccessibilityList(
+        callingApps: Array<String>,
+        inList: List<AccessibilityServiceInfo>,
+    ): List<AccessibilityServiceInfo> {
+        logV(TAG, { "@getInstalledAccessibilityServiceList*calculator: $callingApps - Current: $inList" })
+
+        val caller = callingApps.firstOrNull { callerIsSpoofed(it) } ?: return inList
+
+        val calculatedList = inList.filter { asInfo ->
+            !service.shouldHide(caller, Utils.getPackageNameFromResolveInfo(asInfo.resolveInfo))
+        }
+
+        logV(TAG, { "@getInstalledAccessibilityServiceList*calculator: $caller - Calculated: $calculatedList" })
+
+        return calculatedList
+    }
+
     private fun callerIsSpoofed(caller: String) =
         service.getEnabledSettingsPresets(caller).contains(AccessibilityPreset.NAME)
-
-    private fun hookedMethod(param: HookParam) {
-        try {
-            val callingApps = Utils4Zygote.getCallingApps(service)
-            if (callingApps.isEmpty()) return
-
-            val caller = callingApps.firstOrNull { callerIsSpoofed(it) }
-            if (caller != null) {
-                val returnedList = java.util.ArrayList<AccessibilityServiceInfo>()
-
-                logD(TAG, { "@${param.methodName} returned empty list for ${callingApps.contentToString()}" })
-
-                val returnParcel = param.frame.type().returnType().simpleName.contains("Parcel")
-                param.result = if (returnParcel) {
-                    ParceledListSlice(returnedList)
-                } else {
-                    returnedList
-                }
-
-                // service.increasePMFilterCount(caller)
-            }
-        } catch (e: Throwable) {
-            logE(TAG, { "Fatal error occurred, ignore hooks" }, e)
-        }
-    }
 }
