@@ -22,8 +22,8 @@ class PlatformCompatHook(private val service: HMAService) : IFrameworkHook {
 
     override fun load() {
         if (!service.config.forceMountData) return
-        logI(TAG, "Load hook")
-        logI(TAG, "App data isolation enabled: $sAppDataIsolationEnabled")
+        logI(TAG, { "Load hook" })
+        logI(TAG, { "App data isolation enabled: $sAppDataIsolationEnabled" })
 
         BulkHooker.instance.hookBefore(
             PLATFORM_COMPAT_CLASS,
@@ -40,10 +40,10 @@ class PlatformCompatHook(private val service: HMAService) : IFrameworkHook {
                 if (app == BuildConfig.APP_PACKAGE_NAME || app in service.systemApps) return@hookBefore
                 if (service.isHookEnabled(app)) {
                     param.result = true
-                    logD(TAG, "force mount data: ${appInfo.uid} $app")
+                    logD(TAG, { "force mount data: ${appInfo.uid} $app" })
                 }
             }.onFailure {
-                logE(TAG, "Fatal error occurred, disable hooks", it)
+                logE(TAG, { "Fatal error occurred, disable hooks" }, it)
             }
         }
     }

@@ -89,10 +89,10 @@ class HMAService(val pms: IPackageManager, val pmn: Any?) : IHMAService.Stub() {
         loadFilterCount()
         loadConfig()
         installHooks()
-        logI(TAG, "HMA service initialized")
+        logI(TAG, { "HMA service initialized" })
 
         AppPresets.instance.loggerFunction = { level, msg ->
-            logWithLevel(level, "AppPresets", msg)
+            logWithLevel(level, "AppPresets", { msg })
         }
         reloadPresetsFromScratch()
     }
@@ -132,7 +132,7 @@ class HMAService(val pms: IPackageManager, val pmn: Any?) : IHMAService.Stub() {
         logFile.createNewFile()
 
         logcatAvailable = true
-        logI(TAG, "Data dir: $dataDir")
+        logI(TAG, { "Data dir: $dataDir" })
     }
 
     private fun loadConfig() {
@@ -141,7 +141,7 @@ class HMAService(val pms: IPackageManager, val pmn: Any?) : IHMAService.Stub() {
             runCatching {
                 if (it.exists()) it.delete()
             }.onFailure { e ->
-                logW(TAG, "Failed to delete filter count, skip it", e)
+                logW(TAG, { "Failed to delete filter count, skip it" }, e)
             }
         }
 
@@ -150,44 +150,44 @@ class HMAService(val pms: IPackageManager, val pmn: Any?) : IHMAService.Stub() {
             runCatching {
                 if (it.exists()) it.delete()
             }.onFailure { e ->
-                logW(TAG, "Failed to delete preset cache, skip it", e)
+                logW(TAG, { "Failed to delete preset cache, skip it" }, e)
             }
         }
 
         if (!configFile.exists()) {
-            logI(TAG, "Config file not found")
+            logI(TAG, { "Config file not found" })
             return
         }
         val loading = runCatching {
             val json = configFile.readText()
             JsonConfig.parse(json)
         }.getOrElse {
-            logE(TAG, "Failed to parse config.json", it)
+            logE(TAG, { "Failed to parse config.json" }, it)
             return
         }
         if (loading.configVersion != BuildConfig.CONFIG_VERSION) {
-            logW(TAG, "Config version mismatch, need to reload")
+            logW(TAG, { "Config version mismatch, need to reload" })
             return
         }
         cleanRemnantsFromConfig(loading)
         config = loading
-        logI(TAG, "Config loaded")
+        logI(TAG, { "Config loaded" })
     }
 
     private fun loadFilterCount() {
         if (!filterCountFile.exists()) {
-            logI(TAG, "Filter count file not found")
+            logI(TAG, { "Filter count file not found" })
             return
         }
         val loading = runCatching {
             val json = filterCountFile.readText()
             FilterHolder.parse(json)
         }.getOrElse {
-            logE(TAG, "Failed to parse filter_count.json", it)
+            logE(TAG, { "Failed to parse filter_count.json" }, it)
             return
         }
         filterHolder = loading
-        logI(TAG, "Filter counts loaded")
+        logI(TAG, { "Filter counts loaded" })
     }
 
     private fun installHooks() {
@@ -220,7 +220,7 @@ class HMAService(val pms: IPackageManager, val pmn: Any?) : IHMAService.Stub() {
         frameworkHooks.add(ZygoteHook(this))
 
         frameworkHooks.forEach(IFrameworkHook::load)
-        logI(TAG, "Hooks installed")
+        logI(TAG, { "Hooks installed" })
     }
 
     fun increasePMFilterCount(callingUid: Int?, amount: Int = 1) = increaseFilterCount(
@@ -378,20 +378,20 @@ class HMAService(val pms: IPackageManager, val pmn: Any?) : IHMAService.Stub() {
         if (caller == BuildConfig.APP_PACKAGE_NAME) return Constants.FAKE_INSTALLATION_SOURCE_DISABLED
         val appConfig = config.scope[caller] ?: return Constants.FAKE_INSTALLATION_SOURCE_DISABLED
         if (!appConfig.hideInstallationSource) return Constants.FAKE_INSTALLATION_SOURCE_DISABLED
-        logD(TAG, "@shouldHideInstallationSource $caller: $query")
+        logD(TAG, { "@shouldHideInstallationSource $caller: $query" })
         if (caller == query && appConfig.excludeTargetInstallationSource) return Constants.FAKE_INSTALLATION_SOURCE_DISABLED
 
         try {
             val uid = getPackageUidCompat(pms, query, 0L, callingHandle.hashCode())
             logD(
                 TAG,
-                "@shouldHideInstallationSource UID for $caller, ${callingHandle.hashCode()}: $query, $uid"
+                { "@shouldHideInstallationSource UID for $caller, ${callingHandle.hashCode()}: $query, $uid" }
             )
             if (uid < 0) return Constants.FAKE_INSTALLATION_SOURCE_DISABLED // invalid package installation source request
         } catch (e: Throwable) {
             logD(
                 TAG,
-                "@shouldHideInstallationSource UID error for $caller, ${callingHandle.hashCode()}",
+                { "@shouldHideInstallationSource UID error for $caller, ${callingHandle.hashCode()}" },
                 e
             )
             return Constants.FAKE_INSTALLATION_SOURCE_DISABLED
@@ -411,7 +411,7 @@ class HMAService(val pms: IPackageManager, val pmn: Any?) : IHMAService.Stub() {
     override fun stopService(cleanEnv: Boolean) {
         if (!cleanEnv) return
 
-        logI(TAG, "Clean runtime environment")
+        logI(TAG, { "Clean runtime environment" })
         File(dataDir).deleteRecursively()
     }
 
@@ -429,7 +429,7 @@ class HMAService(val pms: IPackageManager, val pmn: Any?) : IHMAService.Stub() {
                 val newConfig = JsonConfig.parse(json)
                 cleanRemnantsFromConfig(newConfig)
                 if (newConfig.configVersion != BuildConfig.CONFIG_VERSION) {
-                    logW(TAG, "Sync config: version mismatch, need reboot")
+                    logW(TAG, { "Sync config: version mismatch, need reboot" })
                     return
                 }
                 config = newConfig
@@ -440,7 +440,7 @@ class HMAService(val pms: IPackageManager, val pmn: Any?) : IHMAService.Stub() {
                 // remove filter counts for apps if they are not in config
                 filterHolder.filterCounts.removeIf { key, _ -> !config.scope.containsKey(key) }
             }.onSuccess {
-                logD(TAG, "Config synced")
+                logD(TAG, { "Config synced" })
             }.onFailure {
                 return@synchronized
             }
@@ -458,7 +458,7 @@ class HMAService(val pms: IPackageManager, val pmn: Any?) : IHMAService.Stub() {
             runCatching {
                 filterCountFile.writeText(filterHolder.toString())
             }.onSuccess {
-                logD(TAG, "Filter count synced")
+                logD(TAG, { "Filter count synced" })
             }.onFailure {
                 return@onFailure
             }
@@ -499,10 +499,10 @@ class HMAService(val pms: IPackageManager, val pmn: Any?) : IHMAService.Stub() {
                     if (packageName == BuildConfig.APP_PACKAGE_NAME && appUid < 0) {
                         val pkgInfo = getPackageInfoCompat(pms, packageName, 0L, 0)
                         if (verifyAppSignature(pkgInfo?.applicationInfo?.sourceDir)) {
-                            logI(TAG, "The manager app signature is verified successfully")
+                            logI(TAG, { "The manager app signature is verified successfully" })
                             appUid = pkgInfo!!.applicationInfo!!.uid
                         } else {
-                            logE(TAG, "The manager app itself is modified, skipping")
+                            logE(TAG, { "The manager app itself is modified, skipping" })
                             appUid = -1
                         }
                     }
@@ -516,7 +516,7 @@ class HMAService(val pms: IPackageManager, val pmn: Any?) : IHMAService.Stub() {
                     }
 
                     if (packageName == BuildConfig.APP_PACKAGE_NAME && appUid >= 0) {
-                        logI(TAG, "The manager app is uninstalled")
+                        logI(TAG, { "The manager app is uninstalled" })
                         appUid = -1
                     }
 
@@ -542,7 +542,7 @@ class HMAService(val pms: IPackageManager, val pmn: Any?) : IHMAService.Stub() {
     }
 
     override fun log(level: Int, tag: String, message: String) {
-        logWithLevel(level, tag, message)
+        logWithLevel(level, tag, { message })
     }
 
     override fun getPackageNames(userId: Int) = binderLocalScope {
@@ -583,7 +583,7 @@ class HMAService(val pms: IPackageManager, val pmn: Any?) : IHMAService.Stub() {
         }
 
         AppPresets.instance.reloadPresets(apps)
-        logI(TAG, "All presets are loaded")
+        logI(TAG, { "All presets are loaded" })
     }
 
     override fun getDetailedFilterStats() = filterHolder.toString()

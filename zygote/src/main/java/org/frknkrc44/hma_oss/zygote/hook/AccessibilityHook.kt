@@ -54,7 +54,7 @@ class AccessibilityHook(private val service: HMAService) : IFrameworkHook {
             if (caller != null) {
                 val returnedList = java.util.ArrayList<AccessibilityServiceInfo>()
 
-                logD(TAG, "@${param.methodName} returned empty list for ${callingApps.contentToString()}")
+                logD(TAG, { "@${param.methodName} returned empty list for ${callingApps.contentToString()}" })
 
                 val returnParcel = param.frame.type().returnType().simpleName.contains("Parcel")
                 param.result = if (returnParcel) {
@@ -66,7 +66,7 @@ class AccessibilityHook(private val service: HMAService) : IFrameworkHook {
                 // service.increasePMFilterCount(caller)
             }
         } catch (e: Throwable) {
-            logE(TAG, "Fatal error occurred, ignore hooks", e)
+            logE(TAG, { "Fatal error occurred, ignore hooks" }, e)
         }
     }
 }

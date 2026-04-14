@@ -36,7 +36,7 @@ class ImmHook(private val service: HMAService) : IFrameworkHook {
         if (defaultInputMethod?.value != null) {
             try {
                 val component = ComponentName.unflattenFromString(defaultInputMethod.value!!)!!
-                logD(TAG, "Package component: \"$component\"")
+                logD(TAG, { "Package component: \"$component\"" })
 
                 val pkgManager = Utils4Zygote.getPackageManager()
                 val kbdPackage = Utils.binderLocalScope {
@@ -50,7 +50,7 @@ class ImmHook(private val service: HMAService) : IFrameworkHook {
                     null,
                 )
             } catch (e: Throwable) {
-                logV(TAG, e.message ?: "", e)
+                logV(TAG, { e.message ?: "" }, e)
             }
         }
 
@@ -80,7 +80,7 @@ class ImmHook(private val service: HMAService) : IFrameworkHook {
 
                         val caller = callingApps.firstOrNull { callerIsSpoofed(it) }
                         if (caller != null) {
-                            logD(TAG, "@${param.methodName} spoofed input method for $caller")
+                            logD(TAG, { "@${param.methodName} spoofed input method for $caller" })
 
                             val fakeIMInfo = getFakeInputMethodInfo(caller)
                             val userHandle = param.getArgument(1) as Int
@@ -103,10 +103,10 @@ class ImmHook(private val service: HMAService) : IFrameworkHook {
                     method.declaringClass.name,
                     method.name,
                 ) { param ->
-                    logD(TAG, "@${param.methodName}: hook init")
+                    logD(TAG, { "@${param.methodName}: hook init" })
 
                     val currentResult = param.result ?: return@hookAfter
-                    logD(TAG, "@${param.methodName}: Result: $currentResult Args: ${param.args.contentToString()}")
+                    logD(TAG, { "@${param.methodName}: Result: $currentResult Args: ${param.args.contentToString()}" })
 
                     val callingUid = if (param.args.count { it is Int } > 2) {
                         param.args.lastOrNull { it is Int && it > 999 } as? Int ?: return@hookAfter
@@ -114,7 +114,7 @@ class ImmHook(private val service: HMAService) : IFrameworkHook {
                         Binder.getCallingUid()
                     }
 
-                    logD(TAG, "@${param.methodName}: Caller ID: $callingUid")
+                    logD(TAG, { "@${param.methodName}: Caller ID: $callingUid" })
 
                     val returnType = param.frame.type().returnType()
                     if (returnType.simpleName == "InputMethodInfoSafeList") {
@@ -149,7 +149,7 @@ class ImmHook(private val service: HMAService) : IFrameworkHook {
 
                     val caller = callingApps.firstOrNull { callerIsSpoofed(it) }
                     if (caller != null) {
-                        logD(TAG, "@${param.methodName}: spoofed input method for $caller")
+                        logD(TAG, { "@${param.methodName}: spoofed input method for $caller" })
 
                         val fakeIMInfo = getFakeInputMethodInfo(caller)
                         if (!isIMExists(fakeIMInfo.packageName)) {
@@ -214,7 +214,7 @@ class ImmHook(private val service: HMAService) : IFrameworkHook {
 
         val caller = callingApps.firstOrNull { callerIsSpoofed(it) }
         if (caller != null) {
-            logD(TAG, "@${param.methodName}: spoofed input method subtype for ${callingApps.contentToString()}")
+            logD(TAG, { "@${param.methodName}: spoofed input method subtype for ${callingApps.contentToString()}" })
 
             // TODO: Find a method to get exact value for spoofed input method
             param.result = null
@@ -227,7 +227,7 @@ class ImmHook(private val service: HMAService) : IFrameworkHook {
 
         val caller = callingApps.firstOrNull { callerIsSpoofed(it) }
         if (caller != null) {
-            logD(TAG, "@${param.methodName}: spoofed input method subtype for ${callingApps.contentToString()}")
+            logD(TAG, { "@${param.methodName}: spoofed input method subtype for ${callingApps.contentToString()}" })
 
             // TODO: Find a method to get exact list for spoofed input method
             Collections.emptyList<InputMethodSubtype>().let { list ->
@@ -245,18 +245,18 @@ class ImmHook(private val service: HMAService) : IFrameworkHook {
     }
 
     fun calculateReturnedInputMethodList(callingUid: Int, inList: List<InputMethodInfo>): List<InputMethodInfo> {
-        logV(TAG, "@getInputMethodList*calculator: $callingUid - Current: ${inList.map { it.component }}")
+        logV(TAG, { "@getInputMethodList*calculator: $callingUid - Current: ${inList.map { it.component }}" })
 
         val caller = Utils4Zygote.getCallingApps(service, callingUid)
             .firstOrNull { callerIsSpoofed(it) } ?: return inList
 
-        logD(TAG, "@getInputMethodList: spoofed input method for $caller")
+        logD(TAG, { "@getInputMethodList: spoofed input method for $caller" })
 
         val calculatedList = inList.filter { imInfo ->
             !service.shouldHide(caller, imInfo.packageName)
         }
 
-        logV(TAG, "@getInputMethodList*calculator: $callingUid - Calculated: ${calculatedList.map { it.component }}")
+        logV(TAG, { "@getInputMethodList*calculator: $callingUid - Calculated: ${calculatedList.map { it.component }}" })
 
         val fakeIMInfo = getFakeInputMethodInfo(caller)
 
@@ -281,7 +281,7 @@ class ImmHook(private val service: HMAService) : IFrameworkHook {
     }
 
     private fun warnNotInstalledKeyboard(methodName: String, packageName: String) {
-        logW(TAG, "@$methodName: PROBABLY spoofing for a not installed keyboard, please install $packageName or spoof for another keyboard by using settings templates to reduce detections. Do not care this message if you are sure the keyboard is installed correctly.")
+        logW(TAG, { "@$methodName: PROBABLY spoofing for a not installed keyboard, please install $packageName or spoof for another keyboard by using settings templates to reduce detections. Do not care this message if you are sure the keyboard is installed correctly." })
     }
 
     private fun callerIsSpoofed(caller: String) =

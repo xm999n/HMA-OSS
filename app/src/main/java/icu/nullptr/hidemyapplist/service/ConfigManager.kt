@@ -212,13 +212,13 @@ object ConfigManager {
     }
 
     fun updateTemplate(name: String, template: JsonConfig.Template) {
-        Log.d(TAG, "updateTemplate: $name list = ${template.appList}")
+        ServiceClient.log(Log.DEBUG, TAG, "updateTemplate: $name list = ${template.appList}")
         config.templates[name] = template
         saveConfig()
     }
 
     fun updateTemplateAppliedApps(name: String, appliedList: List<String>) {
-        Log.d(TAG, "updateTemplateAppliedApps: $name list = $appliedList")
+        ServiceClient.log(Log.DEBUG, TAG, "updateTemplateAppliedApps: $name list = $appliedList")
         config.scope.forEach { (app, appInfo) ->
             if (appliedList.contains(app)) appInfo.applyTemplates.add(name)
             else appInfo.applyTemplates.remove(name)
@@ -262,13 +262,13 @@ object ConfigManager {
     }
 
     fun updateSettingTemplate(name: String, template: JsonConfig.SettingsTemplate) {
-        Log.d(TAG, "updateSettingTemplate: $name list = ${template.settingsList}")
+        ServiceClient.log(Log.DEBUG, TAG, "updateSettingTemplate: $name list = ${template.settingsList}")
         config.settingsTemplates[name] = template
         saveConfig()
     }
 
     fun updateSettingTemplateAppliedApps(name: String, appliedList: List<String>) {
-        Log.d(TAG, "updateSettingTemplateAppliedApps: $name list = $appliedList")
+        ServiceClient.log(Log.DEBUG, TAG, "updateSettingTemplateAppliedApps: $name list = $appliedList")
         config.scope.forEach { (app, appInfo) ->
             if (appliedList.contains(app)) appInfo.applySettingTemplates.add(name)
             else appInfo.applySettingTemplates.remove(name)

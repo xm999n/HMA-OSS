@@ -32,7 +32,7 @@ class AppDataIsolationHook(private val service: HMAService): IFrameworkHook {
 
     override fun load() {
         if (!(service.config.altAppDataIsolation || service.config.altVoldAppDataIsolation)) return
-        logI(TAG, "Load hook")
+        logI(TAG, { "Load hook" })
 
         BulkHooker.instance.apply {
             hookBefore(
@@ -52,7 +52,7 @@ class AppDataIsolationHook(private val service: HMAService): IFrameworkHook {
                             true
                         )
 
-                        logI(TAG, "ProcessList - App data isolation is forced")
+                        logI(TAG, { "ProcessList - App data isolation is forced" })
                     }
                 }
 
@@ -61,7 +61,7 @@ class AppDataIsolationHook(private val service: HMAService): IFrameworkHook {
 
                     if (!fuseEnabled) {
                         voldHookSkipped = true
-                        logE(TAG, "ProcessList - FUSE storage is not enabled, skip vold hook")
+                        logE(TAG, { "ProcessList - FUSE storage is not enabled, skip vold hook" })
                     } else {
                         val isolationEnabled = getBooleanField(
                             param.thisObject,
@@ -75,7 +75,7 @@ class AppDataIsolationHook(private val service: HMAService): IFrameworkHook {
                                 true
                             )
 
-                            logI(TAG, "ProcessList - Vold app data isolation is forced")
+                            logI(TAG, { "ProcessList - Vold app data isolation is forced" })
                         }
                     }
                 }
@@ -105,7 +105,7 @@ class AppDataIsolationHook(private val service: HMAService): IFrameworkHook {
 
                     logD(
                         TAG,
-                        "@needsStorageDataIsolation $uid and ${apps.contentToString()} - $processName value without override: ${param.result}, mount node: $mountNode, isolated: $isolated, appZygote: $appZygote"
+                        { "@needsStorageDataIsolation $uid and ${apps.contentToString()} - $processName value without override: ${param.result}, mount node: $mountNode, isolated: $isolated, appZygote: $appZygote" }
                     )
 
                     // Do not isolate this module for safety
@@ -122,7 +122,7 @@ class AppDataIsolationHook(private val service: HMAService): IFrameworkHook {
                         val isSystemApp = service.systemApps.any { apps.contains(it) }
                         logD(
                             TAG,
-                            "@needsStorageDataIsolation $uid and ${apps.contentToString()} - isSystemApp: $isSystemApp"
+                            { "@needsStorageDataIsolation $uid and ${apps.contentToString()} - isSystemApp: $isSystemApp" }
                         )
 
                         if (isSystemApp) {
@@ -141,7 +141,7 @@ class AppDataIsolationHook(private val service: HMAService): IFrameworkHook {
                     val fuseEnabled = SystemProperties.getBoolean(FUSE_PROP, false)
 
                     if (!fuseEnabled) {
-                        logE(TAG, "StorageManagerService - FUSE storage is not enabled, skip vold hook")
+                        logE(TAG, { "StorageManagerService - FUSE storage is not enabled, skip vold hook" })
                         voldHookSkipped = true
                         return@hookBefore
                     }
@@ -158,7 +158,7 @@ class AppDataIsolationHook(private val service: HMAService): IFrameworkHook {
                             true
                         )
 
-                        logI(TAG, "StorageManagerService - Vold app data isolation is forced")
+                        logI(TAG, { "StorageManagerService - Vold app data isolation is forced" })
                     }
                 }
             }
@@ -179,7 +179,7 @@ class AppDataIsolationHook(private val service: HMAService): IFrameworkHook {
                         if (packageName in service.systemApps || packageName == BuildConfig.APP_PACKAGE_NAME) {
                             logD(
                                 TAG,
-                                "@remountAppStorageDirs SYSTEM $pid - $packageName is marked to remove"
+                                { "@remountAppStorageDirs SYSTEM $pid - $packageName is marked to remove" }
                             )
                             keysToRemove += pid
                             break

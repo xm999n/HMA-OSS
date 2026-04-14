@@ -61,7 +61,7 @@ class PmsHookTarget34(service: HMAService) : PmsHookTargetBase(service) {
 
     @Suppress("UNCHECKED_CAST")
     override fun load() {
-        logI(TAG, "Load hook")
+        logI(TAG, { "Load hook" })
 
         BulkHooker.instance.apply {
             hookBefore(

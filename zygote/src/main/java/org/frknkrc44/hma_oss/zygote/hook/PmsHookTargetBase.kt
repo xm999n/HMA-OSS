@@ -54,7 +54,7 @@ abstract class PmsHookTargetBase(protected val service: HMAService) : IFramework
                     val callingApps = getCallingApps(service, callingUid)
                     val caller = callingApps.firstOrNull { service.isHookEnabled(it) }
                     if (caller != null) {
-                        logD(TAG, "@getPackageStates: incoming query from $caller")
+                        logD(TAG, { "@getPackageStates: incoming query from $caller" })
 
                         val result = param.result as ArrayMap<*, *>
                         val markedToRemove = mutableListOf<Any>()
@@ -70,7 +70,7 @@ abstract class PmsHookTargetBase(protected val service: HMAService) : IFramework
                         if (markedToRemove.isNotEmpty()) {
                             val copyResult = ArrayMap(result)
                             copyResult.removeAll(markedToRemove)
-                            logD(TAG, "@getPackageStates: removed ${markedToRemove.size} entries from $caller")
+                            logD(TAG, { "@getPackageStates: removed ${markedToRemove.size} entries from $caller" })
                             param.result = copyResult
                             service.increasePMFilterCount(caller)
                         }
@@ -254,20 +254,20 @@ abstract class PmsHookTargetBase(protected val service: HMAService) : IFramework
         val callingUid = findCallingUid()
         if (callingUid == null || callingUid == Constants.UID_SYSTEM) return
         val targetApp = findTargetApp() ?: return
-        logV(TAG, "@$methodName incoming query: $callingUid => $targetApp")
+        logV(TAG, { "@$methodName incoming query: $callingUid => $targetApp" })
         if (HMAServiceCache.instance.shouldHideFromUid(callingUid, targetApp) == true) {
             applyReturnValue()
             service.increasePMFilterCount(callingUid)
-            logD(TAG, "@$methodName caller cache: $callingUid, target: $targetApp")
+            logD(TAG, { "@$methodName caller cache: $callingUid, target: $targetApp" })
             return
         }
         val callingApps = findCallingApps(callingUid)
         val caller = callingApps?.firstOrNull { service.shouldHide(it, targetApp) }
         if (caller != null) {
-            logD(TAG, "@$methodName caller: $callingUid $caller, target: $targetApp")
+            logD(TAG, { "@$methodName caller: $callingUid $caller, target: $targetApp" })
             applyReturnValue()
             val last = lastFilteredApp.getAndSet(caller)
-            if (last != caller) logI(TAG, "@${methodName}: query from $caller")
+            if (last != caller) logI(TAG, { "@${methodName}: query from $caller" })
             HMAServiceCache.instance.putShouldHideUidCache(callingUid, caller, targetApp)
             service.increasePMFilterCount(caller)
         }

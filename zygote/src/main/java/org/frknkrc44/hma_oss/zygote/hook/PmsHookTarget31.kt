@@ -43,7 +43,7 @@ class PmsHookTarget31(service: HMAService) : PmsHookTargetBase(service) {
     }
 
     override fun load() {
-        logI(TAG, "Load hook")
+        logI(TAG, { "Load hook" })
 
         BulkHooker.instance.apply {
             hookBefore(

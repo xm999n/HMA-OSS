@@ -23,7 +23,7 @@ object UserService {
     private val uidObserver = object : UidObserverAdapter() {
         override fun onUidActive(uid: Int) {
             if (HMAService.instance == null) {
-                logE(TAG, "HMAService instance is not available, maybe stopped")
+                logE(TAG, { "HMAService instance is not available, maybe stopped" })
                 return
             }
 
@@ -47,18 +47,18 @@ object UserService {
                     provider?.call("android", Constants.PROVIDER_AUTHORITY, "", null, extras)
                 }
                 if (reply == null) {
-                    logE(TAG, "Failed to send binder to app")
+                    logE(TAG, { "Failed to send binder to app" })
                     return
                 }
-                logI(TAG, "Send binder to app")
+                logI(TAG, { "Send binder to app" })
             } catch (e: Throwable) {
-                logE(TAG, "onUidActive", e)
+                logE(TAG, { "onUidActive" }, e)
             }
         }
     }
 
     fun register(pms: IPackageManager, pmn: Any?) {
-        logI(TAG, "Initialize HMAService - Version ${BuildConfig.APP_VERSION_NAME}")
+        logI(TAG, { "Initialize HMAService - Version ${BuildConfig.APP_VERSION_NAME}" })
 
         var appUid = -1
 
@@ -66,7 +66,7 @@ object UserService {
             val pkgInfo = getPackageInfoCompat(pms, BuildConfig.APP_PACKAGE_NAME, 0L, 0)
             if (pkgInfo != null) {
                 if (verifyAppSignature(pkgInfo.applicationInfo?.sourceDir)) {
-                    logI(TAG, "The manager app signature is verified successfully")
+                    logI(TAG, { "The manager app signature is verified successfully" })
                     appUid = pkgInfo.applicationInfo!!.uid
                 } else {
                     throw AssertionError("The manager app is modified, skipping")
@@ -75,11 +75,11 @@ object UserService {
             assert(appUid >= 0) {
                 "App UID cannot be -1 or lower"
             }
-            logD(TAG, "Client uid: $appUid")
+            logD(TAG, { "Client uid: $appUid" })
         } catch (e: Throwable) {
             logE(
                 TAG,
-                "Fatal: Cannot get package details\nCompile this app from source with your changes",
+                { "Fatal: Cannot get package details\nCompile this app from source with your changes" },
                 e
             )
         }
@@ -92,7 +92,7 @@ object UserService {
             null
         )
 
-        logI(TAG, "Registered observer")
+        logI(TAG, { "Registered observer" })
 
         val service = HMAService(pms, pmn)
         service.appUid = appUid
