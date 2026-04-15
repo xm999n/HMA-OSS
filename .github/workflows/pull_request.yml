@@ -59,10 +59,9 @@ jobs:
       - name: Build debug
         id: buildDebug
         run: |
-          ./gradlew assembleDebug
-          echo "debugAPKName=$(ls app/build/outputs/apk/debug/*.apk | awk -F '(/|.apk)' '{print $6}')" >> $GITHUB_OUTPUT
-          echo "debugZIPName=$(ls zygote/build/outputs/magisk/debug/*.zip | awk -F '(/|.zip)' '{print $6}')" >> $GITHUB_OUTPUT
-
+          ./gradlew assemble
+          echo "releaseName=$(ls app/build/outputs/apk/release/*.apk | awk -F '(/|.apk)' '{print $6}')" >> $GITHUB_OUTPUT
+          
       - name: Upload debug APK
         if: success()
         uses: actions/upload-artifact@v7
@@ -70,7 +69,7 @@ jobs:
           archive: false
           name: ${{ steps.buildDebug.outputs.debugAPKName }}
           path: |
-            app/build/outputs/apk/debug/*.apk
+            app/build/outputs/apk/release/*.apk
 
       - name: Upload debug ZIP
         if: success()
@@ -79,4 +78,4 @@ jobs:
           archive: false
           name: ${{ steps.buildDebug.outputs.debugZIPName }}
           path: |
-            zygote/build/outputs/magisk/debug/*.zip
+            zygote/build/outputs/magisk/release/*.zip
